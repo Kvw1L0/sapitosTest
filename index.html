@@ -1,230 +1,168 @@
-<!DOCTYPE html>
+    <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-  <title>powerSap · V2</title>
+  <title> </title>
   <meta name="theme-color" content="#0057D2" />
   <style>
-    :root{ --text:#ffffff; --muted: rgba(255,255,255,.78); --radius:22px; --shadow: 0 12px 40px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.035);}
+    :root{ --text:#ffffff; --muted: rgba(255,255,255,.78); --shadow: 0 12px 40px rgba(0,0,0,.35);}
+    *{ box-sizing: border-box; } html,body{ height:100%; }
     body{
-      margin:0; height:100%; color:var(--text);
+      margin:0; color:var(--text);
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
-      overflow:hidden;
+      overscroll-behavior: contain;
       background:
-        radial-gradient(1000px 600px at 20% -10%, rgba(0,112,242,0.18), transparent 40%),
-        radial-gradient(900px 600px at 90% 110%, rgba(137,209,255,0.14), transparent 40%),
+        radial-gradient(1200px 700px at 20% -10%, rgba(0,112,242,.20), transparent 40%),
+        radial-gradient(1100px 700px at 90% 110%, rgba(137,209,255,.16), transparent 40%),
         linear-gradient(180deg,#00144A 0%, #0040B0 35%, #0057D2 65%, #0070F2 100%);
     }
-
-    .wrap{ height:100%; display:grid; grid-template-rows:1fr auto; gap:12px; }
-    .card{
-      width:min(980px, 92vw); margin: 14px auto 0;
-      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.00));
-      border:1px solid rgba(255,255,255,.10); box-shadow: var(--shadow);
-      border-radius: var(--radius); display:grid; grid-template-columns: 1fr; align-items:center;
-      padding: 18px; gap:18px;
-    }
-    .panel{ background:rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.10); border-radius: var(--radius); padding:18px; box-shadow: var(--shadow); }
-
-    .meter{ display:grid; place-items:center; margin:0 auto; position:relative; }
-    .note-wrap{ width:min(460px, 90vw); aspect-ratio: 1/1; position:relative; display:grid; place-items:center; filter: drop-shadow(0 10px 24px rgba(0,0,0,.35)); }
-    .note-wrap .label{ position:absolute; inset:auto 0 6%; text-align:center; font-weight:800; letter-spacing:.5px; font-size: clamp(22px, 6vw, 34px); text-shadow: 0 1px 0 rgba(0,0,0,.45);}
-    .label small{ display:block; font-weight:600; font-size:.46em; color:var(--muted); margin-top:6px;}
-    .hint{ color:var(--muted); font-size:.95rem; line-height:1.4; text-align:center; }
-    .footer{ padding:10px 20px 18px; color:var(--muted); font-size:.9rem; text-align:center; }
-
+    .viewport{ min-height:100svh; display:grid; place-items:center; padding: calc(env(safe-area-inset-top) + 8px) 16px calc(env(safe-area-inset-bottom) + 12px); }
+    .note-wrap{ width:min(560px, 88vw); aspect-ratio:1/1; position:relative; display:grid; place-items:center; }
+    #noteOutline{ opacity:0; } /* sin contorno al inicio */
+    #fillRect{ transition: height .08s linear, y .08s linear; }
+    .label{ display:none; } /* sin % ni textos */
     #confettiCanvas{ position:fixed; inset:0; pointer-events:none; }
+
+    /* Overlay iOS (solo para permiso, sin hint permanente) */
+    .overlay{ position:fixed; inset:0; display:none; place-items:center; background:rgba(0,0,0,.6); z-index:10; text-align:center; padding:24px; }
+    .overlay.show{ display:grid; }
+    .overlay .inner{ background:rgba(0,0,0,.65); border:1px solid rgba(255,255,255,.12); border-radius:18px; padding:22px 24px; max-width:min(520px, 90vw); }
+    .overlay h2{ margin:0 0 8px; }
+    .btn{ -webkit-tap-highlight-color: transparent; user-select:none; cursor:pointer; padding: 12px 16px; border-radius: 14px; border:1px solid rgba(255,255,255,.12); background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.04)); color:var(--text); font-weight:700; letter-spacing:.3px; box-shadow: var(--shadow); }
+
     .win{ position: fixed; inset:0; display:grid; place-items:center; pointer-events:none; opacity:0; transition: opacity .35s ease; }
     .win.show{ opacity:1; }
-    .win .msg{ background: rgba(0,0,0,.65); border: 1px solid rgba(255,255,255,.12); padding: 22px 24px; border-radius: 18px; box-shadow: var(--shadow); text-align:center; max-width:min(640px, 92vw);}
+    .win .msg{ background: rgba(0,0,0,.65); border: 1px solid rgba(255,255,255,.12); padding: 22px 24px; border-radius: 18px; text-align:center; max-width:min(640px, 92vw);}
     .msg h2{ margin: 0 0 6px; font-size: clamp(22px, 5vw, 32px); }
-    .msg p{ margin: 0; color: var(--muted); }
-
-    /* Overlay iOS: primer tap para permisos */
-    .overlay{ position:fixed; inset:0; display:none; place-items:center; background:rgba(0,0,0,.6); z-index:1000; text-align:center; padding:24px; }
-    .overlay.show{ display:grid; }
-    .overlay .inner{
-      background:rgba(0,0,0,.65); border:1px solid rgba(255,255,255,.12);
-      border-radius:18px; padding:22px 24px; max-width:min(520px, 90vw); box-shadow: var(--shadow);
-    }
-    .overlay h2{ margin:0 0 8px; }
-
-    .controls-bottom{ display:flex; justify-content:center; gap:10px; margin-top:6px; }
-    .btn{
-      -webkit-tap-highlight-color: transparent; user-select:none; cursor:pointer;
-      padding: 12px 16px; border-radius: 14px;
-      border:1px solid rgba(255,255,255,.12);
-      background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.04));
-      color:var(--text); font-weight:700; letter-spacing:.3px;
-      box-shadow: var(--shadow);
-      transition: transform .06s ease, box-shadow .2s ease, background .2s ease;
-    }
-    .btn:hover{ transform: translateY(-1px);}
-    .btn:active{ transform: translateY(1px) scale(.995);}
-    .btn.secondary{ background: rgba(255,255,255,.06); }
+    .msg p{ margin: 0; color: var(--muted);}
   </style>
 </head>
 <body>
   <canvas id="confettiCanvas"></canvas>
 
-  <!-- iOS overlay (tap-to-start) -->
+  <!-- iOS: tap para permiso del acelerómetro -->
   <div id="tapOverlay" class="overlay" role="dialog" aria-modal="true">
     <div class="inner">
       <h2>Listo para agitar 🎵</h2>
-      <p>Toca cualquier parte para activar los sensores en iOS.</p>
-      <p style="opacity:.8; font-size:.9rem; margin-top:6px">En Android no es necesario, se activa solo.</p>
+      <p>Toca para activar los sensores en iOS.</p>
     </div>
   </div>
 
-  <div class="wrap">
-    <main class="card">
-      <section class="panel">
-        <div class="meter">
-          <div class="note-wrap">
-            <svg id="noteSVG" viewBox="0 0 300 300" aria-label="Corchea">
-              <defs>
-                <linearGradient id="gradSAP" x1="0%" y1="100%" x2="0%" y2="0%">
-                  <stop offset="0%" stop-color="#0040B0"/>
-                  <stop offset="65%" stop-color="#0057D2"/>
-                  <stop offset="100%" stop-color="#89D1FF"/>
-                </linearGradient>
-                <!-- Máscara en userSpaceOnUse (absoluta) -->
-                <mask id="noteMask" maskUnits="userSpaceOnUse" x="0" y="0" width="300" height="300">
-                  <g id="maskGeom"></g>
-                </mask>
-                <!-- Glow suave -->
-                <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-                  <feGaussianBlur stdDeviation="1.25" result="coloredBlur"/>
-                  <feMerge>
-                    <feMergeNode in="coloredBlur"/>
-                    <feMergeNode in="SourceGraphic"/>
-                  </feMerge>
-                </filter>
-              </defs>
+  <div class="viewport">
+    <div class="note-wrap">
+      <svg id="noteSVG" viewBox="0 0 300 300" aria-label="Corchea">
+        <defs>
+          <linearGradient id="gradSAP" x1="0%" y1="100%" x2="0%" y2="0%">
+            <stop offset="0%" stop-color="#0040B0"/>
+            <stop offset="65%" stop-color="#0057D2"/>
+            <stop offset="100%" stop-color="#89D1FF"/>
+          </linearGradient>
+          <!-- Máscara con puntas redondeadas -->
+          <mask id="noteMask" maskUnits="userSpaceOnUse" x="0" y="0" width="300" height="300">
+            <g id="maskGeom" fill="#fff" stroke="#fff" stroke-linejoin="round" stroke-linecap="round"></g>
+          </mask>
+          <!-- Contorno oculto (si algún día se quiere mostrar) -->
+          <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="1.25" result="coloredBlur"/>
+            <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
 
-              <!-- Relleno vertical enmascarado por la corchea -->
-              <rect id="fillRect" x="0" y="300" width="300" height="0" fill="url(#gradSAP)" mask="url(#noteMask)"></rect>
+        <!-- Relleno (lo único visible al inicio) -->
+        <rect id="fillRect" x="0" y="300" width="300" height="0" fill="url(#gradSAP)" mask="url(#noteMask)"></rect>
 
-              <!-- Contorno visible -->
-              <g id="noteOutline" fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linejoin="round" stroke-linecap="round" filter="url(#glow)">
-                <g id="outlineGeom"></g>
-              </g>
+        <!-- Contorno (oculto) -->
+        <g id="noteOutline" fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linejoin="round" stroke-linecap="round" filter="url(#glow)">
+          <g id="outlineGeom"></g>
+        </g>
 
-              <!-- Tu SVG como fuente (oculto) -->
-              <g id="noteRaw" style="display:none">
-                <!-- Pega aquí tu corchea EXACTA si quieres re-emplazar -->
-                <!-- Ejemplo de placeholder (se puede borrar): -->
-                <ellipse cx="120" cy="220" rx="42" ry="32" fill="none" stroke="#000" stroke-width="10"/>
-                <path d="M150 210 L150 60" fill="none" stroke="#000" stroke-width="10"/>
-                <path d="M150 60 C210 70, 210 110, 150 120" fill="none" stroke="#000" stroke-width="10"/>
-              </g>
-            </svg>
-            <div class="label">
-              <span id="pct">0%</span>
-              <small id="status">Sensores inactivos</small>
-            </div>
-          </div>
-        </div>
+        <!-- Pega aquí tu corchea -->
+        <g id="noteRaw" style="display:none">
+          <!-- EJEMPLO (borra y pega tus paths/figuras reales) -->
+          <ellipse cx="120" cy="220" rx="42" ry="32" fill="none" stroke="#000" stroke-width="10"/>
+          <path d="M150 210 L150 60" fill="none" stroke="#000" stroke-width="10"/>
+          <path d="M150 60 C210 70, 210 110, 150 120" fill="none" stroke="#000" stroke-width="10"/>
+        </g>
+      </svg>
 
-        <p class="hint">En iOS verás un overlay “toca para iniciar”. En Android se activa solo.</p>
-        <div class="controls-bottom">
-          <button id="btn-restart" class="btn secondary" hidden>↻ Reiniciar</button>
-        </div>
-      </section>
-    </main>
-
-    <footer class="footer">powerSap · V2</footer>
+      <div class="label"><span id="pct">0%</span><small id="status">Sensores inactivos</small></div>
+      <button id="btn-restart" class="btn" hidden>↻ Reiniciar</button>
+    </div>
   </div>
 
   <div class="win" id="win">
     <div class="msg">
-      <h2>¡Energía lista! ⚡</h2>
-      <p>“Juega con ritmo, juega en equipo.”</p>
+      <h2>¡La música nos une! 🎵</h2>
+      <p>Ritmo y alegría en equipo.</p>
     </div>
   </div>
 
 <script>
 (() => {
   const btnRestart = document.getElementById('btn-restart');
-  const pctEl = document.getElementById('pct');
-  const statusEl = document.getElementById('status');
   const fillRect = document.getElementById('fillRect');
-  const noteOutline = document.getElementById('noteOutline');
   const outlineGeom = document.getElementById('outlineGeom');
   const maskGeom = document.getElementById('maskGeom');
   const overlay = document.getElementById('tapOverlay');
   const win = document.getElementById('win');
 
   let progress = 0, enabled = false, finished = false;
-  let lastAccel = {x: null, y: null, z: null};
-  let lastTime = 0, lastPeakTime = 0;
+  let lastAccel = {x: null, y: null, z: null}, lastTime = 0, lastPeakTime = 0;
   let bbox = null;
 
   // Calibración anti-ruido
-  let calibrating = false; let calStart = 0; const calWindowMs = 800; const calSamples = [];
-  let noiseThreshold = 0.35;
+  let calibrating = false, calStart = 0, calSamples = [], noiseThreshold = 0.35;
   const maxDeltaPerEvent = 3.0, maxPerSecond = 38.0; let addedThisSecond = 0, lastSec = 0;
 
-  // Inserta tu SVG en grupos visibles, luego ajusta a 300x300
   function prepareNote(){
-    const raw = document.getElementById('noteRaw');
-    if(!raw) return;
+    const raw = document.getElementById('noteRaw'); if(!raw) return;
+    maskGeom.innerHTML = raw.innerHTML; outlineGeom.innerHTML = raw.innerHTML;
 
-    // Clonar fuente a máscara y contorno
-    maskGeom.innerHTML = raw.innerHTML;
-    outlineGeom.innerHTML = raw.innerHTML;
-
-    // Forzar máscara sólida (blanco + trazo mínimo)
+    // Máscara sólida y redondeada
     maskGeom.querySelectorAll('*').forEach(el => {
-      el.setAttribute('fill', '#fff');
-      el.setAttribute('stroke', '#fff');
+      el.setAttribute('fill','#fff'); el.setAttribute('stroke','#fff');
+      el.setAttribute('stroke-linejoin','round'); el.setAttribute('stroke-linecap','round');
       const sw = parseFloat(el.getAttribute('stroke-width')) || 0;
-      if(sw < 18) el.setAttribute('stroke-width', '18');
+      if(sw < 22) el.setAttribute('stroke-width','22');
     });
 
-    // Normalizar contorno visible
+    // Contorno (estandarizado, aunque oculto)
     outlineGeom.querySelectorAll('*').forEach(el => {
-      el.setAttribute('fill','none');
-      el.setAttribute('stroke','#FFFFFF');
+      el.setAttribute('fill','none'); el.setAttribute('stroke','#FFFFFF');
+      el.setAttribute('stroke-linejoin','round'); el.setAttribute('stroke-linecap','round');
       if(!el.hasAttribute('stroke-width')) el.setAttribute('stroke-width','6');
     });
 
-    // BBox + transform después de estar visibles
+    // Ajustar al lienzo
     requestAnimationFrame(() => {
-      let vb;
-      try { vb = outlineGeom.getBBox(); } catch(e) { return; }
-
-      const padding = 12, target = 300;
+      let vb; try { vb = outlineGeom.getBBox(); } catch { return; }
+      const padding = 10, target = 300;
       const scale = Math.min((target-2*padding)/vb.width, (target-2*padding)/vb.height);
       const tx = (target - vb.width*scale)/2 - vb.x*scale;
       const ty = (target - vb.height*scale)/2 - vb.y*scale;
       const tfm = `translate(${tx},${ty}) scale(${scale})`;
-
       maskGeom.setAttribute('transform', tfm);
       outlineGeom.setAttribute('transform', tfm);
 
-      requestAnimationFrame(computeBBox);
+      requestAnimationFrame(() => {
+        try{
+          const o = document.getElementById('noteOutline').getBBox();
+          bbox = o;
+          fillRect.setAttribute('x', bbox.x);
+          fillRect.setAttribute('width', bbox.width);
+          updateFill(0);
+        }catch{}
+      });
     });
-  }
-
-  function computeBBox(){
-    try{
-      bbox = noteOutline.getBBox();
-      fillRect.setAttribute('x', bbox.x);
-      fillRect.setAttribute('width', bbox.width);
-      updateFill(progress || 0);
-    }catch(err){ requestAnimationFrame(computeBBox); }
   }
 
   function updateFill(p){
     const now = Date.now(); const sec = Math.floor(now/1000);
     if(sec !== lastSec){ lastSec = sec; addedThisSecond = 0; }
-
     progress = Math.max(0, Math.min(100, p));
-    pctEl.textContent = Math.round(progress) + '%';
-
     if(!bbox) return;
+
     const h = bbox.height * (progress/100);
     const y = bbox.y + bbox.height - h;
     fillRect.setAttribute('y', y);
@@ -232,8 +170,7 @@
 
     if(progress >= 100 && !finished){
       finished = true;
-      statusEl.textContent = '¡Completado!';
-      showWin(); startConfetti(2800);
+      showWin(); startConfetti(2400);
       btnRestart.hidden = false;
       window.removeEventListener('devicemotion', onMotion, true);
     }
@@ -250,10 +187,7 @@
     if(finalDelta > 0){ addedThisSecond += finalDelta; updateFill(progress + finalDelta); }
   }
 
-  function startCalibration(){
-    calibrating = true; calStart = Date.now(); calSamples.length = 0;
-    statusEl.textContent = 'Calibrando…';
-  }
+  function startCalibration(){ calibrating = true; calStart = Date.now(); calSamples.length = 0; }
   function endCalibration(){
     calibrating = false;
     if(calSamples.length > 8){
@@ -262,39 +196,23 @@
       const absDevs = calSamples.map(v => Math.abs(v - median)).sort((a,b)=>a-b);
       const mad = absDevs[Math.floor(absDevs.length/2)] || 0;
       noiseThreshold = Math.max(0.35, median + 2.5*mad);
-    } else {
-      noiseThreshold = 0.5;
-    }
-    statusEl.textContent = enabled ? 'Sensores activos' : 'Sensores inactivos';
+    } else { noiseThreshold = 0.5; }
   }
 
   function onMotion(e){
     const a = e.acceleration && (e.acceleration.x !== null) ? e.acceleration : e.accelerationIncludingGravity;
     if(!a) return;
-    const now = Date.now();
-    if(now - lastTime < 50) return;
-    lastTime = now;
+    const now = Date.now(); if(now - lastTime < 50) return; lastTime = now;
 
     if(lastAccel.x === null){ lastAccel = {x:a.x||0, y:a.y||0, z:a.z||0}; return; }
-    const dx = (a.x||0) - lastAccel.x;
-    const dy = (a.y||0) - lastAccel.y;
-    const dz = (a.z||0) - lastAccel.z;
+    const dx = (a.x||0) - lastAccel.x, dy = (a.y||0) - lastAccel.y, dz = (a.z||0) - lastAccel.z;
     lastAccel = {x:a.x||0, y:a.y||0, z:a.z||0};
 
     const intensity = Math.sqrt(dx*dx + dy*dy + dz*dz);
     const factor = 1.2; let delta = Math.max(0, (intensity - noiseThreshold) * factor);
 
-    if(calibrating){
-      if(now - calStart < 800){ calSamples.push(intensity); return; }
-      else { endCalibration(); }
-    }
-
-    if(delta > 0 && (now - lastPeakTime) >= 140){
-      lastPeakTime = now;
-      delta = Math.min(delta, 3.0);
-      addProgress(delta);
-      statusEl.textContent = 'Detectando movimiento…';
-    }
+    if(calibrating){ if(now - calStart < 800){ calSamples.push(intensity); return; } else { endCalibration(); } }
+    if(delta > 0 && (now - lastPeakTime) >= 140){ lastPeakTime = now; addProgress(Math.min(delta, 3.0)); }
   }
 
   function isIOS(){
@@ -308,100 +226,56 @@
     }
     return true;
   }
-  function enableMotion(){
-    if(enabled) return;
-    enabled = true;
-    statusEl.textContent = 'Sensores activos';
-    window.addEventListener('devicemotion', onMotion, true);
-    startCalibration();
-  }
-  function disableMotion(){
-    enabled = false;
-    window.removeEventListener('devicemotion', onMotion, true);
-  }
-  function resetAll(){
-    finished = false; btnRestart.hidden = true; hideWin();
-    updateFill(0); startCalibration();
-    statusEl.textContent = enabled ? 'Sensores activos' : 'Sensores inactivos';
-  }
+  function enableMotion(){ if(enabled) return; enabled = true; window.addEventListener('devicemotion', onMotion, true); startCalibration(); }
+  function disableMotion(){ enabled = false; window.removeEventListener('devicemotion', onMotion, true); }
+  function resetAll(){ finished = false; btnRestart.hidden = true; hideWin(); updateFill(0); startCalibration(); }
   btnRestart.addEventListener('click', resetAll);
-
-  document.addEventListener('visibilitychange', () => {
-    if(document.hidden) disableMotion();
-    else if(!enabled) enableAutoMotion();
-  });
+  document.addEventListener('visibilitychange', () => { if(document.hidden) disableMotion(); else if(!enabled) enableAutoMotion(); });
 
   // Confetti
-  const canvas = document.getElementById('confettiCanvas');
-  const ctx = canvas.getContext('2d');
-  let confettiPieces = []; let animId = null;
-  function resizeCanvas(){ canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-  window.addEventListener('resize', resizeCanvas); resizeCanvas();
+  const canvas = document.getElementById('confettiCanvas'); const ctx = canvas.getContext('2d');
+  let confettiPieces = [], animId = null;
+  function resizeCanvas(){ canvas.width = window.innerWidth; canvas.height = window.innerHeight; } window.addEventListener('resize', resizeCanvas); resizeCanvas();
   function randomRange(min, max){ return Math.random() * (max - min) + min; }
   function createConfetti(count){
     const colors = ['#0057D2','#0070F2','#4DB1FF','#89D1FF','#FFFFFF'];
     const pieces = [];
     for(let i=0;i<count;i++){
-      pieces.push({
-        x: Math.random()*canvas.width, y: randomRange(-20, -canvas.height*0.3),
-        size: randomRange(6, 12), color: colors[i % colors.length],
-        speedX: randomRange(-1, 1), speedY: randomRange(2, 5),
-        rot: randomRange(0, Math.PI*2), rotSpeed: randomRange(-0.2, 0.2),
-      });
+      pieces.push({ x: Math.random()*canvas.width, y: randomRange(-20, -canvas.height*0.3), size: randomRange(6, 12), color: colors[i % colors.length], speedX: randomRange(-1, 1), speedY: randomRange(2, 5), rot: randomRange(0, Math.PI*2), rotSpeed: randomRange(-0.2, 0.2) });
     }
     return pieces;
   }
   function drawConfetti(){
     ctx.clearRect(0,0,canvas.width, canvas.height);
     for(const p of confettiPieces){
-      p.x += p.speedX; p.y += p.speedY; p.rot += p.rotSpeed;
-      if(p.y > canvas.height + 20){ p.y = -10; p.x = Math.random()*canvas.width; }
-      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot);
-      ctx.fillStyle = p.color; ctx.fillRect(-p.size/2, -p.size/2, p.size, p.size);
-      ctx.restore();
+      p.x+=p.speedX; p.y+=p.speedY; p.rot+=p.rotSpeed;
+      if(p.y>canvas.height+20){ p.y=-10; p.x=Math.random()*canvas.width; }
+      ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot); ctx.fillStyle=p.color; ctx.fillRect(-p.size/2,-p.size/2,p.size,p.size); ctx.restore();
     }
-    animId = requestAnimationFrame(drawConfetti);
+    animId=requestAnimationFrame(drawConfetti);
   }
-  function startConfetti(ms=2500){
-    confettiPieces = createConfetti(180);
-    if(animId) cancelAnimationFrame(animId);
-    drawConfetti();
-    setTimeout(() => {
-      const fade = setInterval(() => {
-        confettiPieces.forEach(p => p.speedY *= 0.92);
-        if(confettiPieces.every(p => p.speedY < 0.2)){
-          clearInterval(fade);
-          if(animId) cancelAnimationFrame(animId);
-          ctx.clearRect(0,0,canvas.width, canvas.height);
-          confettiPieces = [];
-        }
-      }, 60);
-    }, ms);
+  function startConfetti(ms=2400){
+    confettiPieces = createConfetti(160); if(animId) cancelAnimationFrame(animId); drawConfetti();
+    setTimeout(()=>{ const fade=setInterval(()=>{ confettiPieces.forEach(p=>p.speedY*=0.92); if(confettiPieces.every(p=>p.speedY<0.2)){ clearInterval(fade); if(animId) cancelAnimationFrame(animId); ctx.clearRect(0,0,canvas.width, canvas.height); confettiPieces=[]; } },60); }, ms);
   }
-  function showWin(){ win.classList.add('show'); }
-  function hideWin(){ win.classList.remove('show'); }
+  function showWin(){ win.classList.add('show'); } function hideWin(){ win.classList.remove('show'); }
 
-  // Auto-start: Android directo; iOS requiere primer tap
+  // Auto-start sensores
   function enableAutoMotion(){
     if(isIOS()){
       overlay.classList.add('show');
       const start = () => {
         overlay.classList.remove('show');
         window.removeEventListener('pointerdown', start, true);
-        requestPermissionIOS().then(granted => { if(granted) enableMotion(); else statusEl.textContent = 'Permiso denegado.'; });
+        requestPermissionIOS().then(g => { if(g) enableMotion(); });
       };
       window.addEventListener('pointerdown', start, true);
-    } else {
-      enableMotion();
-    }
+    } else { enableMotion(); }
   }
 
-  // Init
-  window.addEventListener('load', () => {
-    prepareNote();           // Inyecta tu corchea, fuerza máscara y crea contorno
-    enableAutoMotion();      // Arranque sensores (Android auto / iOS con tap)
-  });
+  window.addEventListener('load', () => { prepareNote(); enableAutoMotion(); });
 })();
 </script>
 </body>
 </html>
+
