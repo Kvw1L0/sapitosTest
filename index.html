@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+  <title>Corchea que se rellena · Kids ↔ SAP (v2)</title>
+  <meta name="theme-color" content="#0057D2" />
+  <style>
+    :root{ --text:#ffffff; --muted: rgba(255,255,255,.78); --radius:22px; --shadow: 0 12px 40px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.035);}
+    body{ margin:0; height:100%; color:var(--text); font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif; overflow:hidden; }
+    body.theme-sap{ background:
+      radial-gradient(1000px 600px at 20% -10%, rgba(0,112,242,0.18), transparent 40%),
+      radial-gradient(900px 600px at 90% 110%, rgba(137,209,255,0.14), transparent 40%),
+      linear-gradient(180deg,#00144A 0%, #0040B0 35%, #0057D2 65%, #0070F2 100%);}
+    body.theme-kids{ background:
+      radial-gradient(1200px 600px at 20% -10%, rgba(106,59,255,0.18), transparent 40%),
+      radial-gradient(1100px 600px at 80% 110%, rgba(0,160,220,0.12), transparent 40%),
+      linear-gradient(180deg,#0c1222 0%, #1a1f3c 60%, #0c1222 100%);}
+    .wrap{ height:100%; display:grid; grid-template-rows:auto 1fr auto; gap:12px; }
+    header{ padding:16px 20px 8px; display:flex; align-items:center; justify-content:space-between; }
+    .logo{ display:flex; align-items:center; gap:12px; font-weight:700; letter-spacing:.3px; }
+    .logo-badge{ width:36px; height:36px; border-radius:10px; background:linear-gradient(135deg,#0070F2, #89D1FF); box-shadow: 0 6px 24px rgba(0,0,0,.35); }
+    .controls{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+    .btn{ -webkit-tap-highlight-color: transparent; user-select:none; cursor:pointer; padding: 12px 16px; border-radius: 14px; border:1px solid rgba(255,255,255,.12); background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.04)); color:var(--text); font-weight:700; letter-spacing:.3px; box-shadow: var(--shadow); transition: transform .06s ease, box-shadow .2s ease, background .2s ease; }
+    .btn:hover{ transform: translateY(-1px);}
+    .btn:active{ transform: translateY(1px) scale(.995);}
+    .btn.secondary{ background: rgba(255,255,255,.06); }
+    .segmented{ display:flex; border-radius:14px; overflow:hidden; border:1px solid rgba(255,255,255,.14); box-shadow: var(--shadow);}
+    .segmented button{ border:none; background: rgba(255,255,255,.05); padding:10px 14px; color:#fff; font-weight:700; cursor:pointer; }
+    .segmented button.active{ background: rgba(255,255,255,.18); }
+    .card{ width:min(980px, 92vw); margin: 0 auto; background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.00)); border:1px solid rgba(255,255,255,.10); box-shadow: var(--shadow); border-radius: var(--radius); display:grid; grid-template-columns: 1fr; align-items:center; padding: 18px; gap:18px; }
+    .hero{ display:grid; gap:16px; grid-template-columns: 1fr; }
+    @media(min-width:860px){ .hero{ grid-template-columns: 420px 1fr; align-items:center;} }
+    .panel{ background:rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.10); border-radius: var(--radius); padding:18px; box-shadow: var(--shadow);}
+    .meter{ display:grid; place-items:center; margin:0 auto; position:relative; }
+    .note-wrap{ width:min(420px, 86vw); aspect-ratio: 1/1; position:relative; display:grid; place-items:center; filter: drop-shadow(0 10px 24px rgba(0,0,0,.35)); }
+    .note-wrap .label{ position:absolute; inset:auto 0 6%; text-align:center; font-weight:800; letter-spacing:.5px; font-size: clamp(22px, 6vw, 34px); text-shadow: 0 1px 0 rgba(0,0,0,.45);}
+    .label small{ display:block; font-weight:600; font-size:.46em; color:var(--muted); margin-top:6px;}
+    .hint{ color:var(--muted); font-size:.95rem; line-height:1.4; }
+    .footer{ padding:10px 20px 18px; color:var(--muted); font-size:.9rem; text-align:center; }
+    #confettiCanvas{ position:fixed; inset:0; pointer-events:none; }
+    .win{ position: fixed; inset:0; display:grid; place-items:center; pointer-events:none; opacity:0; transition: opacity .35s ease; }
+    .win.show{ opacity:1; }
+    .win .msg{ background: rgba(0,0,0,.65); border: 1px solid rgba(255,255,255,.12); padding: 22px 24px; border-radius: 18px; box-shadow: var(--shadow); text-align:center; max-width:min(640px, 92vw);}
+    .msg h2{ margin: 0 0 6px; font-size: clamp(22px, 5vw, 32px); }
+    .msg p{ margin: 0; color: var(--muted);}
+    .debug{ font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:.86rem; color:#a9b9de; background: rgba(0,0,0,.2); border-radius: 10px; padding:10px; margin-top:10px; word-break: break-word; }
+    .overlay{ position:fixed; inset:0; display:none; place-items:center; background:rgba(0,0,0,.6); z-index:1000; text-align:center; padding:24px; }
+    .overlay.show{ display:grid; }
+    .overlay .inner{ background:rgba(0,0,0,.65); border:1px solid rgba(255,255,255,.12); border-radius:18px; padding:22px 24px; max-width:min(520px, 90vw); box-shadow: var(--shadow); }
+    .overlay h2{ margin:0 0 8px; }
+  </style>
+</head>
+<body class="theme-sap">
+  <canvas id="confettiCanvas"></canvas>
+  <div id="tapOverlay" class="overlay" role="dialog" aria-modal="true">
+    <div class="inner">
+      <h2>Listo para agitar 🎵</h2>
+      <p>Toca cualquier parte para activar los sensores en iOS.</p>
+      <p style="opacity:.8; font-size:.9rem; margin-top:6px">En Android no es necesario, se activa solo.</p>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <header>
+      <div class="logo">
+        <div class="logo-badge" aria-hidden="true"></div>
+        <div>Corchea que se rellena</div>
+      </div>
+      <div class="controls">
+        <div class="segmented" role="tablist" aria-label="Tema">
+          <button id="btn-sap" class="active" role="tab" aria-selected="true">SAP</button>
+          <button id="btn-kids" role="tab" aria-selected="false">Kids</button>
+        </div>
+        <button id="btn-tap" class="btn secondary">👆 Sumar</button>
+        <button id="btn-restart" class="btn secondary" hidden>↻ Reiniciar</button>
+      </div>
+    </header>
+
+    <main class="card">
+      <section class="panel">
+        <div class="hero">
+          <div class="meter">
+            <div class="note-wrap">
+              <svg id="noteSVG" viewBox="0 0 300 300" aria-label="Corchea">
+                <defs>
+                  <linearGradient id="gradKids" x1="0%" y1="100%" x2="0%" y2="0%">
+                    <stop offset="0%" stop-color="#6a00ff"/>
+                    <stop offset="16%" stop-color="#00a0ff"/>
+                    <stop offset="33%" stop-color="#00ffe5"/>
+                    <stop offset="50%" stop-color="#57ff36"/>
+                    <stop offset="66%" stop-color="#ffee00"/>
+                    <stop offset="83%" stop-color="#ff7a00"/>
+                    <stop offset="100%" stop-color="#ff00d4"/>
+                  </linearGradient>
+                  <linearGradient id="gradSAP" x1="0%" y1="100%" x2="0%" y2="0%">
+                    <stop offset="0%" stop-color="#0040B0"/>
+                    <stop offset="65%" stop-color="#0057D2"/>
+                    <stop offset="100%" stop-color="#89D1FF"/>
+                  </linearGradient>
+                  <mask id="noteMask" maskUnits="userSpaceOnUse" x="0" y="0" width="300" height="300">
+                    <g id="maskContent"></g>
+                  </mask>
+                  <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                    <feGaussianBlur stdDeviation="1.25" result="coloredBlur"/>
+                    <feMerge>
+                      <feMergeNode in="coloredBlur"/>
+                      <feMergeNode in="SourceGraphic"/>
+                    </feMerge>
+                  </filter>
+                </defs>
+
+                <rect id="fillRect" x="0" y="300" width="300" height="0" fill="url(#gradSAP)" mask="url(#noteMask)"></rect>
+
+                <g id="noteOutline" fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linejoin="round" stroke-linecap="round" filter="url(#glow)"></g>
+
+                <!-- Tu SVG embebido (se usa como fuente) -->
+                <g id="noteRaw" style="display:none">
+<defs><clipPath id="1c323f6acc"><path d="M 9.667969 82.167969 L 440 82.167969 L 440 592.164062 L 9.667969 592.164062 Z M 9.667969 82.167969 "/></clipPath><clipPath id="d23d4fdc49"><path d="M 13.011719 82.167969 L 443.621094 82.167969 L 443.621094 592.164062 L 13.011719 592.164062 Z M 13.011719 82.167969 "/></clipPath></defs><g id="f31d12c0b1"><g clip-rule="nonzero" clip-path="url(#1c323f6acc)"><path style=" stroke:none;fill-rule:evenodd;fill:#000000;fill-opacity:1;" d="M 254.207031 82.925781 C 255.757812 82.183594 257.5625 82.199219 259.101562 82.964844 C 275.875 91.296875 300.304688 108.71875 319.824219 134.195312 C 339.398438 159.746094 354.203125 193.648438 350.992188 234.667969 C 348.054688 272.214844 361.496094 296.023438 379.054688 310.835938 C 396.886719 325.878906 419.390625 331.972656 434.5625 332.910156 C 437.113281 333.066406 439.234375 334.9375 439.714844 337.449219 C 440.191406 339.964844 438.90625 342.480469 436.589844 343.566406 C 416.050781 353.183594 383.800781 361.875 353.996094 355.953125 C 338.964844 352.96875 324.46875 346.242188 312.566406 333.980469 C 300.671875 321.726562 291.695312 304.285156 287.128906 280.417969 C 286.113281 275.113281 285.050781 271.0625 283.984375 268.101562 C 283.199219 265.917969 282.492188 264.558594 281.960938 263.761719 C 281.722656 264.007812 281.425781 264.335938 281.078125 264.777344 C 278.542969 267.996094 275.476562 274.253906 272.066406 283.492188 C 268.71875 292.5625 265.222656 303.980469 261.65625 317.085938 C 247.371094 369.578125 232.347656 447.574219 221.121094 505.886719 C 220.746094 507.824219 220.378906 509.742188 220.011719 511.636719 C 216.257812 557.539062 169.710938 592.164062 115.019531 592.164062 C 58.054688 592.164062 9.785156 554.511719 9.785156 505.742188 C 9.785156 456.972656 58.054688 419.320312 115.019531 419.320312 C 136.609375 419.320312 156.75 424.652344 173.523438 433.871094 L 251.15625 86.753906 C 251.53125 85.078125 252.65625 83.664062 254.207031 82.925781 Z M 260.464844 96.398438 L 182.753906 443.867188 C 182.355469 445.65625 181.105469 447.136719 179.40625 447.828125 C 177.710938 448.519531 175.785156 448.339844 174.246094 447.339844 C 158.132812 436.863281 137.546875 430.515625 115.019531 430.515625 C 61.921875 430.515625 20.972656 465.238281 20.972656 505.742188 C 20.972656 546.246094 61.921875 580.96875 115.019531 580.96875 C 166.003906 580.96875 205.914062 548.871094 208.886719 510.449219 C 208.902344 510.238281 208.929688 510.027344 208.96875 509.820312 C 209.296875 508.117188 209.628906 506.398438 209.964844 504.65625 L 210.164062 503.617188 C 221.359375 445.472656 236.453125 367.089844 250.863281 314.144531 C 254.472656 300.882812 258.066406 289.113281 261.574219 279.609375 C 265.019531 270.273438 268.578125 262.5625 272.292969 257.847656 C 274.097656 255.554688 276.558594 253.15625 279.789062 252.296875 C 283.65625 251.269531 287.054688 252.792969 289.449219 255.269531 C 291.609375 257.5 293.210938 260.699219 294.511719 264.304688 C 295.847656 268.015625 297.042969 272.683594 298.117188 278.3125 C 302.363281 300.488281 310.511719 315.796875 320.589844 326.179688 C 330.660156 336.550781 342.988281 342.351562 356.171875 344.972656 C 375.21875 348.753906 395.859375 345.84375 413.136719 340.570312 C 399.621094 336.917969 384.722656 330.261719 371.84375 319.394531 C 351.5 302.234375 336.625 274.898438 339.839844 233.792969 C 342.785156 196.15625 329.269531 164.921875 310.945312 141.007812 C 294.941406 120.121094 275.40625 105.003906 260.464844 96.398438 Z M 260.464844 96.398438 "/></g><g clip-rule="nonzero" clip-path="url(#d23d4fdc49)"><path style=" stroke:none;fill-rule:evenodd;fill:#000000;fill-opacity:1;" d="M 257.550781 82.925781 C 259.101562 82.183594 260.90625 82.199219 262.445312 82.964844 C 279.21875 91.296875 303.648438 108.71875 323.167969 134.195312 C 342.742188 159.746094 357.546875 193.648438 354.335938 234.667969 C 351.398438 272.214844 364.839844 296.023438 382.398438 310.835938 C 400.230469 325.878906 422.734375 331.972656 437.90625 332.910156 C 440.457031 333.066406 442.578125 334.9375 443.058594 337.449219 C 443.535156 339.964844 442.25 342.480469 439.933594 343.566406 C 419.394531 353.183594 387.140625 361.875 357.335938 355.953125 C 342.308594 352.96875 327.8125 346.242188 315.90625 333.980469 C 304.011719 321.726562 295.039062 304.285156 290.472656 280.417969 C 289.457031 275.113281 288.394531 271.0625 287.328125 268.101562 C 286.542969 265.917969 285.835938 264.558594 285.304688 263.761719 C 285.0625 264.007812 284.769531 264.335938 284.421875 264.777344 C 281.886719 267.996094 278.820312 274.253906 275.410156 283.492188 C 272.0625 292.5625 268.566406 303.980469 265 317.085938 C 250.714844 369.578125 235.691406 447.574219 224.464844 505.886719 C 224.089844 507.824219 223.722656 509.742188 223.355469 511.636719 C 219.601562 557.539062 173.050781 592.164062 118.363281 592.164062 C 61.398438 592.164062 13.128906 554.511719 13.128906 505.742188 C 13.128906 456.972656 61.398438 419.320312 118.363281 419.320312 C 139.953125 419.320312 160.09375 424.652344 176.867188 433.871094 L 254.5 86.753906 C 254.875 85.078125 256 83.664062 257.550781 82.925781 Z M 263.804688 96.398438 L 186.097656 443.867188 C 185.699219 445.65625 184.449219 447.136719 182.75 447.828125 C 181.054688 448.519531 179.128906 448.339844 177.589844 447.339844 C 161.476562 436.863281 140.890625 430.515625 118.363281 430.515625 C 65.265625 430.515625 24.316406 465.238281 24.316406 505.742188 C 24.316406 546.246094 65.265625 580.96875 118.363281 580.96875 C 169.347656 580.96875 209.253906 548.871094 212.226562 510.449219 C 212.246094 510.238281 212.273438 510.027344 212.3125 509.820312 C 212.640625 508.117188 212.972656 506.398438 213.304688 504.65625 L 213.507812 503.617188 C 224.703125 445.472656 239.796875 367.089844 254.207031 314.144531 C 257.816406 300.882812 261.40625 289.113281 264.917969 279.609375 C 268.363281 270.273438 271.921875 262.5625 275.636719 257.847656 C 277.441406 255.554688 279.902344 253.15625 283.132812 252.296875 C 287 251.269531 290.398438 252.792969 292.792969 255.269531 C 294.953125 257.5 296.554688 260.699219 297.851562 264.304688 C 299.191406 268.015625 300.382812 272.683594 301.460938 278.3125 C 305.703125 300.488281 313.855469 315.796875 323.933594 326.179688 C 334.003906 336.550781 346.332031 342.351562 359.515625 344.972656 C 378.5625 348.753906 399.203125 345.84375 416.480469 340.570312 C 402.964844 336.917969 388.066406 330.261719 375.1875 319.394531 C 354.84375 302.234375 339.964844 274.898438 343.183594 233.792969 C 346.125 196.15625 332.613281 164.921875 314.289062 141.007812 C 298.285156 120.121094 278.75 105.003906 263.804688 96.398438 Z M 263.804688 96.398438 "/></g></g>
+                </g>
+              </svg>
+              <div class="label">
+                <span id="pct">0%</span>
+                <small id="status">Sensores inactivos</small>
+              </div>
+            </div>
+          </div>
+          <div>
+            <h2 style="margin:0 0 6px;">¡Agita para llenar la corchea!</h2>
+            <p class="hint">En iOS verás un overlay “toca para iniciar”. En Android se activa solo. Si no hay acelerómetro, usa <b>Sumar</b> o doble tap.</p>
+            <div class="debug" id="debug">debug: —</div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">Máscara corregida + calibración anti-ruido + auto-start Android + overlay iOS.</footer>
+  </div>
+
+  <div class="win" id="win">
+    <div class="msg">
+      <h2>¡Energía lista! ⚡</h2>
+      <p>“Juega con ritmo, juega en equipo.”</p>
+    </div>
+  </div>
+
+<script>
+(() => {
+  const btnTap = document.getElementById('btn-tap');
+  const btnRestart = document.getElementById('btn-restart');
+  const btnSAP = document.getElementById('btn-sap');
+  const btnKids = document.getElementById('btn-kids');
+  const pctEl = document.getElementById('pct');
+  const statusEl = document.getElementById('status');
+  const debugEl = document.getElementById('debug');
+  const fillRect = document.getElementById('fillRect');
+  const noteOutline = document.getElementById('noteOutline');
+  const maskContent = document.getElementById('maskContent');
+  const overlay = document.getElementById('tapOverlay');
+  const win = document.getElementById('win');
+
+  let progress = 0;
+  let enabled = false;
+  let finished = false;
+  let lastAccel = {x: null, y: null, z: null};
+  let lastTime = 0;
+  let lastPeakTime = 0;
+  let bbox = null;
+
+  // Noise calibration
+  let calibrating = false;
+  let calStart = 0;
+  const calWindowMs = 800;
+  const calSamples = [];
+  let noiseThreshold = 0.35;
+
+  const maxDeltaPerEvent = 3.0;
+  const maxPerSecond = 38.0;
+  let addedThisSecond = 0;
+  let lastSec = 0;
+  const eventSpacingMin = 140;
+
+  const confettiColors = {
+    sap: ['#0057D2','#0070F2','#4DB1FF','#89D1FF','#FFFFFF'],
+    kids: ['#6a00ff','#00a0ff','#00ffe5','#57ff36','#ffee00','#ff7a00','#ff00d4']
+  };
+  let currentTheme = localStorage.getItem('theme_note_app') || 'sap';
+
+  function applyTheme(t){
+    currentTheme = t;
+    document.body.classList.toggle('theme-sap', t==='sap');
+    document.body.classList.toggle('theme-kids', t==='kids');
+    fillRect.setAttribute('fill', t==='sap' ? 'url(#gradSAP)' : 'url(#gradKids)');
+    btnSAP.classList.toggle('active', t==='sap');
+    btnKids.classList.toggle('active', t==='kids');
+    btnSAP.setAttribute('aria-selected', t==='sap');
+    btnKids.setAttribute('aria-selected', t==='kids');
+    localStorage.setItem('theme_note_app', t);
+  }
+
+  function prepareNote(){
+    const raw = document.getElementById('noteRaw');
+    if(!raw) return;
+    let vb;
+    try { vb = raw.getBBox(); } catch(e) { requestAnimationFrame(prepareNote); return; }
+    const target = 300;
+    const scale = Math.min(target/vb.width, target/vb.height);
+    const tx = (target - vb.width*scale)/2 - vb.x*scale;
+    const ty = (target - vb.height*scale)/2 - vb.y*scale;
+    const tfm = `translate(${tx},${ty}) scale(${scale})`;
+
+    maskContent.innerHTML='';
+    const maskClone = raw.cloneNode(true);
+    maskClone.removeAttribute('id');
+    maskClone.setAttribute('transform', tfm);
+    maskContent.appendChild(maskClone);
+
+    // Forzar blanco para la máscara
+    maskContent.querySelectorAll('*').forEach(el => {
+      el.setAttribute('fill', '#fff');
+      el.setAttribute('stroke', '#fff');
+      const sw = parseFloat(el.getAttribute('stroke-width')) || 0;
+      if(sw < 18) el.setAttribute('stroke-width', '18');
+    });
+
+    noteOutline.innerHTML='';
+    const outlineClone = raw.cloneNode(true);
+    outlineClone.removeAttribute('id');
+    outlineClone.setAttribute('transform', tfm);
+    outlineClone.querySelectorAll('*').forEach(el=>{
+      el.setAttribute('fill','none');
+      el.setAttribute('stroke','#FFFFFF');
+      if(!el.hasAttribute('stroke-width')) el.setAttribute('stroke-width','6');
+    });
+    noteOutline.appendChild(outlineClone);
+  }
+
+  function computeBBox(){
+    try{
+      bbox = noteOutline.getBBox();
+      fillRect.setAttribute('x', bbox.x);
+      fillRect.setAttribute('width', bbox.width);
+      updateFill(progress || 0);
+    }catch(err){
+      debugEl.textContent = 'debug: getBBox() reintentando…';
+      requestAnimationFrame(computeBBox);
+    }
+  }
+
+  function updateFill(p){
+    const now = Date.now();
+    const sec = Math.floor(now/1000);
+    if(sec !== lastSec){ lastSec = sec; addedThisSecond = 0; }
+    progress = Math.max(0, Math.min(100, p));
+    pctEl.textContent = Math.round(progress) + '%';
+
+    if(!bbox) return;
+    const h = bbox.height * (progress/100);
+    const y = bbox.y + bbox.height - h;
+    fillRect.setAttribute('y', y);
+    fillRect.setAttribute('height', h);
+
+    sessionStorage.setItem('note_progress', String(progress));
+
+    if(progress >= 100 && !finished){
+      finished = true;
+      statusEl.textContent = '¡Completado!';
+      showWin();
+      startConfetti(2800);
+      btnRestart.hidden = false;
+      window.removeEventListener('devicemotion', onMotion, true);
+    }
+  }
+
+  function addProgress(delta){
+    if (finished) return;
+    const now = Date.now();
+    const sec = Math.floor(now/1000);
+    if(sec !== lastSec){ lastSec = sec; addedThisSecond = 0; }
+    const capped = Math.min(maxDeltaPerEvent, delta);
+    if(addedThisSecond >= maxPerSecond) return;
+    const room = maxPerSecond - addedThisSecond;
+    const finalDelta = Math.max(0, Math.min(capped, room));
+    if(finalDelta > 0){ addedThisSecond += finalDelta; updateFill(progress + finalDelta); }
+  }
+
+  function startCalibration(){
+    calibrating = true;
+    calStart = Date.now();
+    calSamples.length = 0;
+    statusEl.textContent = 'Calibrando…';
+  }
+
+  function endCalibration(){
+    calibrating = false;
+    if(calSamples.length > 8){
+      calSamples.sort((a,b)=>a-b);
+      const median = calSamples[Math.floor(calSamples.length/2)];
+      const absDevs = calSamples.map(v => Math.abs(v - median)).sort((a,b)=>a-b);
+      const mad = absDevs[Math.floor(absDevs.length/2)] || 0;
+      noiseThreshold = Math.max(0.35, median + 2.5*mad);
+    } else {
+      noiseThreshold = 0.5;
+    }
+    statusEl.textContent = enabled ? 'Sensores activos' : 'Sensores inactivos';
+  }
+
+  function onMotion(e){
+    const a = e.acceleration && (e.acceleration.x !== null) ? e.acceleration : e.accelerationIncludingGravity;
+    if(!a) return;
+    const now = Date.now();
+    if(now - lastTime < 50) return;
+    lastTime = now;
+
+    if(lastAccel.x === null){
+      lastAccel = {x:a.x||0, y:a.y||0, z:a.z||0};
+      return;
+    }
+    const dx = (a.x||0) - lastAccel.x;
+    const dy = (a.y||0) - lastAccel.y;
+    const dz = (a.z||0) - lastAccel.z;
+    lastAccel = {x:a.x||0, y:a.y||0, z:a.z||0};
+
+    const intensity = Math.sqrt(dx*dx + dy*dy + dz*dz);
+    const factor = 1.2;
+    let delta = Math.max(0, (intensity - noiseThreshold) * factor);
+
+    if(calibrating){
+      if(now - calStart < 800){
+        calSamples.push(intensity);
+        debugEl.textContent = `debug: calibrando Δ=${intensity.toFixed(2)}`;
+        return;
+      } else {
+        endCalibration();
+      }
+    }
+
+    if(delta > 0 && (now - lastPeakTime) >= 140){
+      lastPeakTime = now;
+      delta = Math.min(delta, 3.0);
+      addProgress(delta);
+      statusEl.textContent = 'Detectando movimiento…';
+    }
+
+    debugEl.textContent = `debug: a=(${(a.x||0).toFixed(2)}, ${(a.y||0).toFixed(2)}, ${(a.z||0).toFixed(2)}) | Δ=${intensity.toFixed(2)} | thr=${noiseThreshold.toFixed(2)}`;
+  }
+
+  function isIOS(){
+    const ua = navigator.userAgent || navigator.vendor || window.opera;
+    return /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  }
+
+  async function requestPermissionIOS(){
+    if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function'){
+      try{ const state = await DeviceMotionEvent.requestPermission(); return state === 'granted'; }
+      catch{ return false; }
+    }
+    return true;
+  }
+
+  function enableMotion(){
+    if(enabled) return;
+    enabled = true;
+    statusEl.textContent = 'Sensores activos';
+    window.addEventListener('devicemotion', onMotion, true);
+    startCalibration();
+  }
+
+  function disableMotion(){
+    enabled = false;
+    window.removeEventListener('devicemotion', onMotion, true);
+  }
+
+  function resetAll(){
+    finished = false;
+    btnRestart.hidden = true;
+    hideWin();
+    updateFill(0);
+    startCalibration();
+    statusEl.textContent = enabled ? 'Sensores activos' : 'Sensores inactivos';
+  }
+
+  btnTap.addEventListener('click', () => addProgress(5));
+  btnRestart.addEventListener('click', resetAll);
+  btnSAP.addEventListener('click', () => applyTheme('sap'));
+  btnKids.addEventListener('click', () => applyTheme('kids'));
+
+  // Doble toque para sumar
+  let lastTap = 0;
+  window.addEventListener('touchend', () => {
+    const now = Date.now();
+    if(now - lastTap < 300) addProgress(4);
+    lastTap = now;
+  }, {passive:true});
+
+  // Pause/resume en visibilitychange
+  document.addEventListener('visibilitychange', () => {
+    if(document.hidden) disableMotion();
+    else if(!enabled) enableAutoMotion();
+  });
+
+  // Confetti
+  const canvas = document.getElementById('confettiCanvas');
+  const ctx = canvas.getContext('2d');
+  let confettiPieces = [];
+  let animId = null;
+
+  function resizeCanvas(){ canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+
+  function randomRange(min, max){ return Math.random() * (max - min) + min; }
+  function createConfetti(count){
+    const colors = currentTheme==='sap' ? confettiColors.sap : confettiColors.kids;
+    const pieces = [];
+    for(let i=0;i<count;i++){
+      pieces.push({
+        x: Math.random()*canvas.width, y: randomRange(-20, -canvas.height*0.3),
+        size: randomRange(6, 12),
+        color: colors[i % colors.length],
+        angle: randomRange(0, Math.PI*2),
+        speedX: randomRange(-1, 1),
+        speedY: randomRange(2, 5),
+        rot: randomRange(0, Math.PI*2),
+        rotSpeed: randomRange(-0.2, 0.2),
+      });
+    }
+    return pieces;
+  }
+  function drawConfetti(){
+    ctx.clearRect(0,0,canvas.width, canvas.height);
+    for(const p of confettiPieces){
+      p.x += p.speedX; p.y += p.speedY; p.rot += p.rotSpeed;
+      if(p.y > canvas.height + 20){ p.y = -10; p.x = Math.random()*canvas.width; }
+      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot);
+      ctx.fillStyle = p.color; ctx.fillRect(-p.size/2, -p.size/2, p.size, p.size);
+      ctx.restore();
+    }
+    animId = requestAnimationFrame(drawConfetti);
+  }
+  function startConfetti(ms=2500){
+    confettiPieces = createConfetti(180);
+    if(animId) cancelAnimationFrame(animId);
+    drawConfetti();
+    setTimeout(() => {
+      const fade = setInterval(() => {
+        confettiPieces.forEach(p => p.speedY *= 0.92);
+        if(confettiPieces.every(p => p.speedY < 0.2)){
+          clearInterval(fade);
+          if(animId) cancelAnimationFrame(animId);
+          ctx.clearRect(0,0,canvas.width, canvas.height);
+          confettiPieces = [];
+        }
+      }, 60);
+    }, ms);
+  }
+  function showWin(){ win.classList.add('show'); }
+  function hideWin(){ win.classList.remove('show'); }
+
+  function enableAutoMotion(){
+    if(isIOS()){
+      overlay.classList.add('show');
+      const start = () => {
+        overlay.classList.remove('show');
+        window.removeEventListener('pointerdown', start, true);
+        requestPermissionIOS().then(granted => { if(granted) enableMotion(); else statusEl.textContent = 'Permiso denegado. Usa “Sumar”.'; });
+      };
+      window.addEventListener('pointerdown', start, true);
+    } else {
+      enableMotion();
+    }
+  }
+
+  // Init
+  window.addEventListener('load', () => {
+    applyTheme(currentTheme);
+    prepareNote();
+    computeBBox();
+    const saved = parseFloat(sessionStorage.getItem('note_progress'));
+    if(!isNaN(saved)) updateFill(saved); else updateFill(0);
+    enableAutoMotion();
+  });
+})();
+</script>
+</body>
+</html>
