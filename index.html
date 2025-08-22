@@ -1,281 +1,227 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>Rock Challenge</title>
-  <style>
-    :root {
-      --sap-blue: #00A1E0;
-      --neon-pink: #FF00FF;
-      --electric-blue: #03DAC6; 
-      --dark-background: #1A1A2E;
-      --glow-color: #E0F7FA;
-    }
-
-    body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-      background-color: var(--dark-background);
-      background-image: radial-gradient(circle at 50% 50%, #4a2f8c 0%, #1a1a2e 70%);
-      color: white;
-      text-align: center;
-      padding: 20px;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center; /* Centra el contenido verticalmente */
-      height: 100vh;
-      box-sizing: border-box;
-    }
-
-    /* --- Overlays --- */
-    .overlay {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(26, 26, 46, 0.95); backdrop-filter: blur(10px);
-      z-index: 10000; display: flex; flex-direction: column;
-      justify-content: center; align-items: center; padding: 25px;
-      box-sizing: border-box; transition: opacity 0.5s ease-out;
-      opacity: 1; pointer-events: auto;
-    }
-    .overlay.hidden { opacity: 0; pointer-events: none; }
-    .overlay-content { max-width: 450px; }
-    .overlay-content h2 { font-size: 28px; color: var(--sap-blue); text-shadow: none; }
-    .overlay-content p { font-size: 18px; line-height: 1.6; }
-    #startButton {
-      margin-top: 25px; padding: 15px 30px; font-size: 20px; font-weight: bold;
-      color: white; background-color: var(--sap-blue);
-      border: none; border-radius: 10px; cursor: pointer;
-      box-shadow: 0 0 15px var(--sap-blue);
-      transition: transform 0.2s;
-    }
-    #startButton:active { transform: scale(0.95); }
-
-    /* OVERLAY FINAL "WOW" ACTUALIZADO */
-    #overlay-results .results-wrapper {
-        transform: scale(0.8);
-        opacity: 0;
-        animation: result-appear 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-    }
-    @keyframes result-appear {
-      to { transform: scale(1); opacity: 1; }
-    }
-    #overlay-results .final-message {
-        font-size: 2.8em;
-        font-weight: 700; /* Más grueso */
-        margin-bottom: 10px;
-        color: var(--electric-blue);
-        text-shadow: 0 0 8px var(--electric-blue), 0 0 15px white;
-        /* CONTORNO GRUESO */
-        -webkit-text-stroke: 2px white;
-        text-stroke: 2px white;
-        paint-order: stroke fill;
-    }
-    #overlay-results .final-time-value {
-        font-size: 6em;
-        font-weight: 900;
-        color: var(--neon-pink);
-        /* CONTORNO GRUESO */
-        -webkit-text-stroke: 2px white;
-        text-stroke: 2px white;
-        paint-order: stroke fill;
-        text-shadow: 0 0 10px var(--neon-pink), 0 0 20px white, 0 0 30px var(--neon-pink);
-        margin: 0;
-    }
-
-    /* --- Contenido Principal --- */
-    .game-area { display: flex; flex-direction: column; align-items: center; justify-content: center; flex-grow: 1; }
-    .music-note-container {
-      /* CORCHEA AUMENTADA 40% (234px * 1.4 = ~328px) */
-      width: 328px;
-      margin-bottom: 20px; /* Espacio para que no choque con el footer */
-      filter: drop-shadow(0 0 8px var(--glow-color));
-      animation: breathing 4s ease-in-out infinite alternate;
-    }
-    @keyframes breathing {
-      from { transform: scale(1); }
-      to { transform: scale(1.03); }
-    }
-    .footer { width: 100%; font-size: 12px; opacity: 0.4; padding: 10px 0; }
-    #confetti-canvas {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      pointer-events: none; z-index: 10001;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Sapitosday 🐸</title>
 </head>
 <body>
-
-  <div id="overlay-start" class="overlay">
-    <div class="overlay-content">
-      <h2>¡Rock Challenge! ⚡</h2>
-      <p>El desafío es simple: ¡llena de energía la nota musical agitando tu celular <strong>lo más rápido que puedas</strong>! Tu tiempo corre desde el primer momento. ¡Demuestra tu velocidad para entrar al sorteo!</p>
-      <button id="startButton">¡Comenzar!</button>
+    <div class="container">
+        <h1>Sapitosday 🐸</h1>
+        <p>¡El juego que se juega con el movimiento de tu dispositivo!</p>
+        <p>Apunta el dispositivo hacia la pantalla, ¡y cuando el sapo esté a punto de caer, muévelo como si le estuvieras dando un sape! Si lo haces a tiempo, aparecerá la nota musical para que completes la melodía.</p>
+        <p>Intenta llegar a la nota 50 para un final épico</p>
+        <div class="game-container">
+            <div id="frog" class="frog"></div>
+            <div id="target" class="target"></div>
+        </div>
+        <div class="score-container">
+            <div class="notes-container">
+                <span id="notes"></span>
+            </div>
+            <div class="score-text">
+                <p>Tu nota es:</p>
+                <p id="score">0</p>
+            </div>
+        </div>
+        <button id="start-button">A rockear 🐸</button>
+        <div id="end-message" style="display: none;">
+            <p id="final-score"></p>
+            <button id="restart-button">Jugar de nuevo</button>
+        </div>
     </div>
-  </div>
-
-  <div id="overlay-results" class="overlay hidden">
-    <div class="results-wrapper">
-      <p class="final-message" id="final-message"></p>
-      <h2 class="final-time-value" id="final-time"></h2>
-    </div>
-  </div>
-
-  <canvas id="confetti-canvas"></canvas>
-
-  <div class="game-area">
-    <div class="music-note-container">
-      <svg id="userQuaver" viewBox="0 0 450 675" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <linearGradient id="fillGradient" x1="0%" y1="100%" x2="0%" y2="0%">
-            <stop id="fillStop1" offset="0%" stop-color="var(--sap-blue)" />
-            <stop id="fillStop2" offset="0%" stop-color="rgba(30, 30, 30, 0.2)" />
-          </linearGradient>
-        </defs>
-        <path
-          d="M 254.2 82.9 C 255.8 82.2 257.6 82.2 259.1 83 C 275.9 91.3 300.3 108.7 319.8 134.2 C 339.4 159.7 354.2 193.6 351 234.7 C 348.1 272.2 361.5 296 379.1 310.8 C 396.9 325.9 419.4 332 434.6 332.9 C 437.1 333.1 439.2 334.9 439.7 337.4 C 440.2 340 438.9 342.5 436.6 343.6 C 416.1 353.2 383.8 361.9 354 356 C 339 353 324.5 346.2 312.6 334 C 300.7 321.7 291.7 304.3 287.1 280.4 C 286.1 275.1 285.1 271.1 284 268.1 C 283.2 265.9 282.5 264.6 282 263.8 C 281.7 264 281.4 264.3 281.1 264.8 C 278.5 268 275.5 274.3 272.1 283.5 C 268.7 292.6 265.2 304 261.7 317.1 C 247.4 369.6 232.3 447.6 221.1 505.9 C 220.7 507.8 220.4 509.7 220 511.6 C 216.3 557.5 169.7 592.2 115 592.2 C 58.1 592.2 9.8 554.5 9.8 505.7 C 9.8 457 58.1 419.3 115 419.3 C 136.6 419.3 156.8 424.7 173.5 433.9 L 251.2 86.8 C 251.5 85.1 252.7 83.7 254.2 82.9 Z"
-          fill="url(#fillGradient)" stroke="var(--glow-color)" stroke-width="8" />
-      </svg>
-    </div>
-  </div>
-
-  <footer class="footer">Rock Challenge</footer>
-
-  <audio id="sound-guitar" loop src="data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjQ1LjEwMAAAAAAAAAAAAAAA//tQxAADBgwgAAAAAB9FbEd4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAElZpY3RvcmlhIEhlcm5hbmRlenp6egAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//uQxAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlMYXZmNTguNDUuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//uQxAsCAAAANIAYAAANIAYAAAExBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV-A//uQxAYEAAAAANIAYAAANIAYAAAExBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV"></audio>
-
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-
-  <script>
-    const DOMElements = {
-        overlayStart: document.getElementById('overlay-start'),
-        overlayResults: document.getElementById('overlay-results'),
-        startButton: document.getElementById('startButton'),
-        fillStop1: document.getElementById('fillStop1'),
-        fillStop2: document.getElementById('fillStop2'),
-        finalTimeDisplay: document.getElementById('final-time'),
-        finalMessageDisplay: document.getElementById('final-message'),
-        canvas: document.getElementById('confetti-canvas'),
-    };
-
-    const Sounds = {
-        guitar: document.getElementById('sound-guitar'),
-    };
-
-    const GameState = {
-        beats: 0,
-        targetBeats: 600,
-        isGameActive: false,
-        startTime: 0,
-        confettiLauncher: confetti.create(DOMElements.canvas, { resize: true, useWorker: true }),
-    };
-
-    function vibrate(pattern) {
-        if (navigator.vibrate) {
-            navigator.vibrate(pattern);
-        }
-    }
-
-    function handleMotion(event) {
-        if (!GameState.isGameActive) return;
-
-        const acc = event.accelerationIncludingGravity;
-        const shakePower = Math.abs(acc.x) + Math.abs(acc.y) + Math.abs(acc.z);
-
-        if (shakePower > 30) {
-            GameState.beats++;
-
-            const fillPercentage = Math.min((GameState.beats / GameState.targetBeats) * 100, 100);
-            DOMElements.fillStop1.setAttribute('offset', `${fillPercentage}%`);
-            DOMElements.fillStop2.setAttribute('offset', `${fillPercentage}%`);
-
-            if (Sounds.guitar.paused) {
-                Sounds.guitar.play().catch(e => {});
-            }
-            vibrate(50);
-
-            if (GameState.beats >= GameState.targetBeats) {
-                endGame();
-            }
-        }
-    }
-
-    function endGame() {
-        GameState.isGameActive = false;
-        window.removeEventListener('devicemotion', handleMotion);
-        Sounds.guitar.pause();
-        
-        const finalTime = ((Date.now() - GameState.startTime) / 1000).toFixed(2);
-        
-        DOMElements.finalMessageDisplay.innerText = `¡Rockeaste en`;
-        DOMElements.finalTimeDisplay.innerText = `${finalTime}s!`;
-        DOMElements.overlayResults.classList.remove('hidden');
-
-        launchConfetti();
-        vibrate([200, 100, 200]);
-
-        setTimeout(() => {
-            window.location.href = 'https://forms.gle/VvtAHk7RNg5DyYM3A';
-        }, 4000);
-    }
-
-    function launchConfetti() {
-        const duration = 3 * 1000;
-        const animationEnd = Date.now() + duration;
-        const colors = ['#0077C6', '#ADD8E6', '#FFFFFF', '#FF00FF'];
-        function frame() {
-            GameState.confettiLauncher({ particleCount: 3, angle: 60, spread: 55, origin: { x: 0 }, colors: colors });
-            GameState.confettiLauncher({ particleCount: 3, angle: 120, spread: 55, origin: { x: 1 }, colors: colors });
-            if (Date.now() < animationEnd) requestAnimationFrame(frame);
-        }
-        frame();
-    }
     
-    async function initializeGame() {
-        DOMElements.overlayStart.classList.add('hidden');
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const startButton = document.getElementById('start-button');
+            const frog = document.getElementById('frog');
+            const target = document.getElementById('target');
+            const scoreDisplay = document.getElementById('score');
+            const notesDisplay = document.getElementById('notes');
+            const endMessage = document.getElementById('end-message');
+            const finalScore = document.getElementById('final-score');
+            const restartButton = document.getElementById('restart-button');
 
-        try {
-            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            const source = audioContext.createBufferSource();
-            source.buffer = audioContext.createBuffer(1, 1, 22050);
-            source.connect(audioContext.destination);
-            if (source.start) {
-              source.start(0);
-            } else if (source.noteOn) {
-              source.noteOn(0);
+            let score = 0;
+            let frogFallTimeout;
+            let frogPosition = 'left';
+            let isGameActive = false;
+
+            const audioNotes = {
+                're': new Audio('audios/re.mp3'),
+                'mi': new Audio('audios/mi.mp3'),
+                'fa': new Audio('audios/fa.mp3'),
+                'sol': new Audio('audios/sol.mp3'),
+                'la': new Audio('audios/la.mp3'),
+            };
+
+            const notesOrder = ['re', 'mi', 'fa', 'sol', 'la'];
+            let currentNoteIndex = 0;
+
+            function playNote(note) {
+                const noteAudio = audioNotes[note];
+                if (noteAudio) {
+                    noteAudio.currentTime = 0;
+                    noteAudio.play();
+                }
             }
-            await Sounds.guitar.play();
-            Sounds.guitar.pause();
-            Sounds.guitar.currentTime = 0;
-        } catch (e) {
-            console.warn("El contexto de audio no pudo ser iniciado por el usuario. El teléfono podría estar en silencio.");
-        }
 
-        if (typeof DeviceMotionEvent.requestPermission === 'function') {
-            try {
-                const permissionState = await DeviceMotionEvent.requestPermission();
-                if (permissionState === 'granted') {
+            function updateNotesDisplay() {
+                notesDisplay.textContent = notesOrder.slice(0, score).map(note => '🎵').join('');
+            }
+
+            function resetGame() {
+                score = 0;
+                scoreDisplay.textContent = score;
+                notesDisplay.textContent = '';
+                frog.classList.remove('active');
+                target.classList.remove('active');
+                endMessage.style.display = 'none';
+                startButton.style.display = 'block';
+                isGameActive = false;
+                currentNoteIndex = 0;
+                if (frogFallTimeout) {
+                    clearTimeout(frogFallTimeout);
+                }
+            }
+
+            function startGame() {
+                if (isGameActive) return;
+                isGameActive = true;
+                startButton.style.display = 'none';
+                endMessage.style.display = 'none';
+                frog.style.display = 'block';
+                target.style.display = 'block';
+                newFrog();
+            }
+
+            function newFrog() {
+                if (!isGameActive) return;
+
+                frog.classList.remove('left', 'right');
+                frog.classList.add('active');
+
+                // Alterna la posición del sapo
+                if (Math.random() > 0.5) {
+                    frogPosition = 'left';
+                    frog.classList.add('left');
+                } else {
+                    frogPosition = 'right';
+                    frog.classList.add('right');
+                }
+
+                // Asegura que el sapo se mueva
+                setTimeout(() => {
+                    frog.classList.add('fall');
+                    frogFallTimeout = setTimeout(() => {
+                        handleMiss();
+                    }, 1000);
+                }, 500);
+            }
+
+            function handleHit() {
+                if (!isGameActive) return;
+
+                score++;
+                scoreDisplay.textContent = score;
+                clearTimeout(frogFallTimeout);
+                
+                const noteToPlay = notesOrder[currentNoteIndex % notesOrder.length];
+                playNote(noteToPlay);
+                currentNoteIndex++;
+
+                updateNotesDisplay();
+
+                frog.classList.remove('fall');
+                frog.classList.add('hit');
+                setTimeout(() => {
+                    frog.classList.remove('hit');
+                    if (score < 50) {
+                        newFrog();
+                    } else {
+                        endGame();
+                    }
+                }, 500);
+            }
+
+            function handleMiss() {
+                if (!isGameActive) return;
+
+                frog.classList.remove('fall');
+                frog.classList.add('miss');
+                setTimeout(() => {
+                    frog.classList.remove('miss');
+                    endGame();
+                }, 500);
+            }
+
+            function endGame() {
+                isGameActive = false;
+                frog.style.display = 'none';
+                target.style.display = 'none';
+                endMessage.style.display = 'block';
+                finalScore.textContent = `Tu nota final es: ${score}`;
+            }
+
+            function handleMotion(event) {
+                if (!isGameActive) return;
+
+                const acceleration = event.accelerationIncludingGravity;
+                const threshold = 15;
+
+                let isHit = false;
+
+                if (frogPosition === 'left' && acceleration.x > threshold) {
+                    isHit = true;
+                } else if (frogPosition === 'right' && acceleration.x < -threshold) {
+                    isHit = true;
+                }
+                
+                if (isHit) {
+                    const rectFrog = frog.getBoundingClientRect();
+                    const rectTarget = target.getBoundingClientRect();
+                    
+                    const frogTop = rectFrog.top;
+                    const frogBottom = rectFrog.bottom;
+                    const targetTop = rectTarget.top;
+                    const targetBottom = rectTarget.bottom;
+
+                    if (frogBottom >= targetTop && frogTop <= targetBottom) {
+                        handleHit();
+                    }
+                }
+            }
+
+            function requestMotionPermission() {
+                if (typeof DeviceMotionEvent.requestPermission === 'function') {
+                    // iOS 13+
+                    DeviceMotionEvent.requestPermission()
+                        .then(permissionState => {
+                            if (permissionState === 'granted') {
+                                window.addEventListener('devicemotion', handleMotion);
+                                startGame();
+                            } else {
+                                alert('Permiso denegado. No se puede jugar sin el acelerómetro.');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error al solicitar permiso:', error);
+                            alert('Hubo un error al solicitar el permiso del acelerómetro.');
+                        });
+                } else {
+                    // Otros navegadores
                     window.addEventListener('devicemotion', handleMotion);
                     startGame();
-                } else {
-                    alert('Para jugar, necesitas permitir el acceso al sensor de movimiento.');
-                    DOMElements.overlayStart.classList.remove('hidden');
                 }
-            } catch (error) {
-                alert('Hubo un error al solicitar los permisos.');
-                DOMElements.overlayStart.classList.remove('hidden');
             }
-        } else {
-            window.addEventListener('devicemotion', handleMotion);
-            startGame();
-        }
-    }
-    
-    function startGame() {
-        GameState.isGameActive = true;
-        GameState.startTime = Date.now();
-    }
 
-    DOMElements.startButton.addEventListener('click', initializeGame);
-  </script>
+            // Event listener para el botón de inicio
+            startButton.addEventListener('click', requestMotionPermission);
+            
+            // Event listener para el botón de reinicio
+            restartButton.addEventListener('click', resetGame);
+        });
+    </script>
 </body>
 </html>
