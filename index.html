@@ -4,16 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
-    <title>Sapitosday </title>
+    <title>Sapitosday 🎸</title>
 </head>
 <body>
     <div class="container">
-        <h1>Sapitosday 🐸</h1>
+        <h1>Sapitosday 🎸</h1>
         <p>¡El juego que se juega con el movimiento de tu dispositivo!</p>
-        <p>Apunta el dispositivo hacia la pantalla, ¡y cuando el sapo esté a punto de caer, muévelo como si le estuvieras dando un sape! Si lo haces a tiempo, aparecerá la nota musical para que completes la melodía.</p>
+        <p>Apunta el dispositivo hacia la pantalla, ¡y cuando la guitarra esté a punto de caer, muévelo como si le estuvieras dando un sape! Si lo haces a tiempo, aparecerá la nota musical para que completes la melodía.</p>
         <p>Intenta llegar a la nota 50 para un final épico</p>
         <div class="game-container">
-            <div id="frog" class="frog"></div>
+            <div id="guitar" class="guitar"></div>
             <div id="target" class="target"></div>
         </div>
         <div class="score-container">
@@ -25,7 +25,7 @@
                 <p id="score">0</p>
             </div>
         </div>
-        <button id="start-button">A rockear 🐸</button>
+        <button id="start-button">A rockear 🎸</button>
         <div id="end-message" style="display: none;">
             <p id="final-score"></p>
             <button id="restart-button">Jugar de nuevo</button>
@@ -35,7 +35,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const startButton = document.getElementById('start-button');
-            const frog = document.getElementById('frog');
+            const guitar = document.getElementById('guitar');
             const target = document.getElementById('target');
             const scoreDisplay = document.getElementById('score');
             const notesDisplay = document.getElementById('notes');
@@ -44,8 +44,8 @@
             const restartButton = document.getElementById('restart-button');
 
             let score = 0;
-            let frogFallTimeout;
-            let frogPosition = 'left';
+            let guitarFallTimeout;
+            let guitarPosition = 'left';
             let isGameActive = false;
 
             const audioNotes = {
@@ -75,14 +75,14 @@
                 score = 0;
                 scoreDisplay.textContent = score;
                 notesDisplay.textContent = '';
-                frog.classList.remove('active');
+                guitar.classList.remove('active');
                 target.classList.remove('active');
                 endMessage.style.display = 'none';
                 startButton.style.display = 'block';
                 isGameActive = false;
                 currentNoteIndex = 0;
-                if (frogFallTimeout) {
-                    clearTimeout(frogFallTimeout);
+                if (guitarFallTimeout) {
+                    clearTimeout(guitarFallTimeout);
                 }
             }
 
@@ -91,30 +91,30 @@
                 isGameActive = true;
                 startButton.style.display = 'none';
                 endMessage.style.display = 'none';
-                frog.style.display = 'block';
+                guitar.style.display = 'block';
                 target.style.display = 'block';
-                newFrog();
+                newGuitar();
             }
 
-            function newFrog() {
+            function newGuitar() {
                 if (!isGameActive) return;
 
-                frog.classList.remove('left', 'right');
-                frog.classList.add('active');
+                guitar.classList.remove('left', 'right');
+                guitar.classList.add('active');
 
-                // Alterna la posición del sapo
+                // Alterna la posición de la guitarra
                 if (Math.random() > 0.5) {
-                    frogPosition = 'left';
-                    frog.classList.add('left');
+                    guitarPosition = 'left';
+                    guitar.classList.add('left');
                 } else {
-                    frogPosition = 'right';
-                    frog.classList.add('right');
+                    guitarPosition = 'right';
+                    guitar.classList.add('right');
                 }
 
-                // Asegura que el sapo se mueva
+                // Asegura que la guitarra se mueva
                 setTimeout(() => {
-                    frog.classList.add('fall');
-                    frogFallTimeout = setTimeout(() => {
+                    guitar.classList.add('fall');
+                    guitarFallTimeout = setTimeout(() => {
                         handleMiss();
                     }, 1000);
                 }, 500);
@@ -125,7 +125,7 @@
 
                 score++;
                 scoreDisplay.textContent = score;
-                clearTimeout(frogFallTimeout);
+                clearTimeout(guitarFallTimeout);
                 
                 const noteToPlay = notesOrder[currentNoteIndex % notesOrder.length];
                 playNote(noteToPlay);
@@ -133,12 +133,12 @@
 
                 updateNotesDisplay();
 
-                frog.classList.remove('fall');
-                frog.classList.add('hit');
+                guitar.classList.remove('fall');
+                guitar.classList.add('hit');
                 setTimeout(() => {
-                    frog.classList.remove('hit');
+                    guitar.classList.remove('hit');
                     if (score < 50) {
-                        newFrog();
+                        newGuitar();
                     } else {
                         endGame();
                     }
@@ -148,17 +148,17 @@
             function handleMiss() {
                 if (!isGameActive) return;
 
-                frog.classList.remove('fall');
-                frog.classList.add('miss');
+                guitar.classList.remove('fall');
+                guitar.classList.add('miss');
                 setTimeout(() => {
-                    frog.classList.remove('miss');
+                    guitar.classList.remove('miss');
                     endGame();
                 }, 500);
             }
 
             function endGame() {
                 isGameActive = false;
-                frog.style.display = 'none';
+                guitar.style.display = 'none';
                 target.style.display = 'none';
                 endMessage.style.display = 'block';
                 finalScore.textContent = `Tu nota final es: ${score}`;
@@ -172,22 +172,22 @@
 
                 let isHit = false;
 
-                if (frogPosition === 'left' && acceleration.x > threshold) {
+                if (guitarPosition === 'left' && acceleration.x > threshold) {
                     isHit = true;
-                } else if (frogPosition === 'right' && acceleration.x < -threshold) {
+                } else if (guitarPosition === 'right' && acceleration.x < -threshold) {
                     isHit = true;
                 }
                 
                 if (isHit) {
-                    const rectFrog = frog.getBoundingClientRect();
+                    const rectGuitar = guitar.getBoundingClientRect();
                     const rectTarget = target.getBoundingClientRect();
                     
-                    const frogTop = rectFrog.top;
-                    const frogBottom = rectFrog.bottom;
+                    const guitarTop = rectGuitar.top;
+                    const guitarBottom = rectGuitar.bottom;
                     const targetTop = rectTarget.top;
                     const targetBottom = rectTarget.bottom;
 
-                    if (frogBottom >= targetTop && frogTop <= targetBottom) {
+                    if (guitarBottom >= targetTop && guitarTop <= targetBottom) {
                         handleHit();
                     }
                 }
