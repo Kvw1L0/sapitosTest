@@ -1,281 +1,298 @@
-    <!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-  <title> </title>
-  <meta name="theme-color" content="#0057D2" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Energía Colectiva - Corchea V4 (Confetti musical)</title>
+  <meta name="theme-color" content="#4e0199" />
   <style>
-    :root{ --text:#ffffff; --muted: rgba(255,255,255,.78); --shadow: 0 12px 40px rgba(0,0,0,.35);}
-    *{ box-sizing: border-box; } html,body{ height:100%; }
-    body{
-      margin:0; color:var(--text);
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
-      overscroll-behavior: contain;
-      background:
-        radial-gradient(1200px 700px at 20% -10%, rgba(0,112,242,.20), transparent 40%),
-        radial-gradient(1100px 700px at 90% 110%, rgba(137,209,255,.16), transparent 40%),
-        linear-gradient(180deg,#00144A 0%, #0040B0 35%, #0057D2 65%, #0070F2 100%);
+    :root { --bg1:#4e0199; --bg2:#00b0ca; --fill:#00ffcc; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: linear-gradient(to bottom right, var(--bg1), var(--bg2));
+      color: #fff; text-align: center; padding: 20px; overflow-x: hidden;
     }
-    .viewport{ min-height:100svh; display:grid; place-items:center; padding: calc(env(safe-area-inset-top) + 8px) 16px calc(env(safe-area-inset-bottom) + 12px); }
-    .note-wrap{ width:min(560px, 88vw); aspect-ratio:1/1; position:relative; display:grid; place-items:center; }
-    #noteOutline{ opacity:0; } /* sin contorno al inicio */
-    #fillRect{ transition: height .08s linear, y .08s linear; }
-    .label{ display:none; } /* sin % ni textos */
-    #confettiCanvas{ position:fixed; inset:0; pointer-events:none; }
+    .logo { margin-top: 10px; max-width: 60vw; height: auto; }
+    h1 { margin: 16px 0 8px; }
+    .hint { font-size: 18px; margin-top: 8px; opacity: .9; }
+    .controls { margin: 16px 0; display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+    .btn {
+      appearance: none; border: 0; border-radius: 12px; padding: 12px 16px;
+      font-weight: 600; cursor: pointer; background: rgba(255,255,255,.15);
+      color: #fff; backdrop-filter: blur(6px);
+    }
+    .btn:focus { outline: 2px solid #fff; outline-offset: 2px; }
 
-    /* Overlay iOS (solo para permiso, sin hint permanente) */
-    .overlay{ position:fixed; inset:0; display:none; place-items:center; background:rgba(0,0,0,.6); z-index:10; text-align:center; padding:24px; }
-    .overlay.show{ display:grid; }
-    .overlay .inner{ background:rgba(0,0,0,.65); border:1px solid rgba(255,255,255,.12); border-radius:18px; padding:22px 24px; max-width:min(520px, 90vw); }
-    .overlay h2{ margin:0 0 8px; }
-    .btn{ -webkit-tap-highlight-color: transparent; user-select:none; cursor:pointer; padding: 12px 16px; border-radius: 14px; border:1px solid rgba(255,255,255,.12); background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.04)); color:var(--text); font-weight:700; letter-spacing:.3px; box-shadow: var(--shadow); }
+    /* ---- CORCHEA (progreso) ---- */
+    .noteWrap {
+      margin: 24px auto;
+      width: min(80%, 420px);
+      aspect-ratio: 200 / 320;
+      position: relative;
+    }
+    .noteWrap svg { width: 100%; height: 100%; display: block; }
+    .noteOutline { stroke:#fff; stroke-width:6; fill:transparent; opacity:.9; }
+    .noteBack { fill: rgba(255,255,255,.08); }
+    .noteFill {
+      fill: var(--fill);
+      transform-box: fill-box;
+      transform-origin: center bottom;
+      transform: scaleY(0);
+      transition: transform .25s ease-out;
+    }
 
-    .win{ position: fixed; inset:0; display:grid; place-items:center; pointer-events:none; opacity:0; transition: opacity .35s ease; }
-    .win.show{ opacity:1; }
-    .win .msg{ background: rgba(0,0,0,.65); border: 1px solid rgba(255,255,255,.12); padding: 22px 24px; border-radius: 18px; text-align:center; max-width:min(640px, 92vw);}
-    .msg h2{ margin: 0 0 6px; font-size: clamp(22px, 5vw, 32px); }
-    .msg p{ margin: 0; color: var(--muted);}
+    .watts { font-size: 24px; margin-top: 12px; }
+    .footer { margin-top: 40px; font-size: 14px; opacity: .7; }
+
+    /* ---- CONFETTI MUSICAL ---- */
+    .confetti { position: fixed; inset: 0; pointer-events: none; z-index: 9999; overflow: hidden; }
+    .note { position: absolute; top: -10vh; animation: fall 2.2s linear both; }
+    .glyph { display:inline-block; will-change: transform; animation: sway 1.2s ease-in-out infinite alternate; }
+
+    @keyframes fall {
+      0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+    }
+    @keyframes sway {
+      0% { transform: translateX(-10px) rotate(-10deg) scale(1); }
+      100% { transform: translateX(10px) rotate(10deg) scale(1.05); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .note, .glyph { display: none !important; }
+      .noteFill { transition: none; }
+    }
+    .sr { position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden; }
   </style>
 </head>
 <body>
-  <canvas id="confettiCanvas"></canvas>
+  <img class="logo" src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/ed/Siemens_Energy_logo_2020.svg/2560px-Siemens_Energy_logo_2020.svg.png" alt="Siemens Energy" width="200" />
+  <h1>¡Activa tu Energía!</h1>
+  <p class="hint">Sacude tu celular o toca el botón para llenar la corchea colectiva 🎵</p>
 
-  <!-- iOS: tap para permiso del acelerómetro -->
-  <div id="tapOverlay" class="overlay" role="dialog" aria-modal="true">
-    <div class="inner">
-      <h2>Listo para agitar 🎵</h2>
-      <p>Toca para activar los sensores en iOS.</p>
-    </div>
+  <div class="controls">
+    <button id="enableMotion" class="btn">⚙️ Activar sensores</button>
+    <button id="tapCharge" class="btn" title="Usar toque/teclado (Espacio)">🎵 Cargar</button>
+    <button id="resetBtn" class="btn" title="Reinicia (R)">↺ Reset</button>
   </div>
 
-  <div class="viewport">
-    <div class="note-wrap">
-      <svg id="noteSVG" viewBox="0 0 300 300" aria-label="Corchea">
-        <defs>
-          <linearGradient id="gradSAP" x1="0%" y1="100%" x2="0%" y2="0%">
-            <stop offset="0%" stop-color="#0040B0"/>
-            <stop offset="65%" stop-color="#0057D2"/>
-            <stop offset="100%" stop-color="#89D1FF"/>
-          </linearGradient>
-          <!-- Máscara con puntas redondeadas -->
-          <mask id="noteMask" maskUnits="userSpaceOnUse" x="0" y="0" width="300" height="300">
-            <g id="maskGeom" fill="#fff" stroke="#fff" stroke-linejoin="round" stroke-linecap="round"></g>
-          </mask>
-          <!-- Contorno oculto (si algún día se quiere mostrar) -->
-          <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="1.25" result="coloredBlur"/>
-            <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
-          </filter>
-        </defs>
+  <!-- Corchea (progreso) -->
+  <div
+    class="noteWrap"
+    role="progressbar"
+    aria-label="Corchea colectiva"
+    aria-valuemin="0"
+    aria-valuemax="500"
+    aria-valuenow="0"
+  >
+    <svg viewBox="0 0 200 320" aria-hidden="true">
+      <defs>
+        <clipPath id="note-clip" clipPathUnits="userSpaceOnUse">
+          <ellipse cx="72" cy="262" rx="52" ry="38"/>
+          <rect x="116" y="70" width="20" height="210" rx="10" />
+          <path d="M 126 70
+                   C 185 70, 170 120, 128 138
+                   C 185 138, 170 188, 128 206
+                   L 126 186
+                   C 160 170, 150 145, 122 138
+                   L 122 70 Z"/>
+        </clipPath>
+      </defs>
 
-        <!-- Relleno (lo único visible al inicio) -->
-        <rect id="fillRect" x="0" y="300" width="300" height="0" fill="url(#gradSAP)" mask="url(#noteMask)"></rect>
+      <g class="noteBackGroup">
+        <ellipse class="noteBack" cx="72" cy="262" rx="52" ry="38"/>
+        <rect class="noteBack" x="116" y="70" width="20" height="210" rx="10" />
+        <path class="noteBack" d="M 126 70
+                   C 185 70, 170 120, 128 138
+                   C 185 138, 170 188, 128 206
+                   L 126 186
+                   C 160 170, 150 145, 122 138
+                   L 122 70 Z"/>
+      </g>
 
-        <!-- Contorno (oculto) -->
-        <g id="noteOutline" fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linejoin="round" stroke-linecap="round" filter="url(#glow)">
-          <g id="outlineGeom"></g>
-        </g>
+      <g clip-path="url(#note-clip)">
+        <rect id="noteFill" class="noteFill" x="0" y="0" width="200" height="320" />
+      </g>
 
-        <!-- Pega aquí tu corchea -->
-        <g id="noteRaw" style="display:none">
-          <!-- EJEMPLO (borra y pega tus paths/figuras reales) -->
-          <ellipse cx="120" cy="220" rx="42" ry="32" fill="none" stroke="#000" stroke-width="10"/>
-          <path d="M150 210 L150 60" fill="none" stroke="#000" stroke-width="10"/>
-          <path d="M150 60 C210 70, 210 110, 150 120" fill="none" stroke="#000" stroke-width="10"/>
-        </g>
-      </svg>
-
-      <div class="label"><span id="pct">0%</span><small id="status">Sensores inactivos</small></div>
-      <button id="btn-restart" class="btn" hidden>↻ Reiniciar</button>
-    </div>
+      <g class="noteOutlineGroup">
+        <ellipse class="noteOutline" cx="72" cy="262" rx="52" ry="38"/>
+        <rect class="noteOutline" x="116" y="70" width="20" height="210" rx="10" />
+        <path class="noteOutline" d="M 126 70
+                   C 185 70, 170 120, 128 138
+                   C 185 138, 170 188, 128 206
+                   L 126 186
+                   C 160 170, 150 145, 122 138
+                   L 122 70 Z"/>
+      </g>
+    </svg>
   </div>
 
-  <div class="win" id="win">
-    <div class="msg">
-      <h2>¡La música nos une! 🎵</h2>
-      <p>Ritmo y alegría en equipo.</p>
-    </div>
-  </div>
+  <div class="watts"><span id="wattCounter">0</span> Watts generados</div>
+  <div class="confetti" id="confettiContainer"></div>
 
-<script>
-(() => {
-  const btnRestart = document.getElementById('btn-restart');
-  const fillRect = document.getElementById('fillRect');
-  const outlineGeom = document.getElementById('outlineGeom');
-  const maskGeom = document.getElementById('maskGeom');
-  const overlay = document.getElementById('tapOverlay');
-  const win = document.getElementById('win');
+  <p class="sr" aria-live="polite" id="live"></p>
+  <div class="footer">Siemens Energy OpenDay 2025</div>
 
-  let progress = 0, enabled = false, finished = false;
-  let lastAccel = {x: null, y: null, z: null}, lastTime = 0, lastPeakTime = 0;
-  let bbox = null;
+  <script>
+    // --- Estado ---
+    let watts = 0, displayWatts = 0;
+    const maxWatts = 500;
+    const noteFill = document.getElementById('noteFill');
+    const wattCounter = document.getElementById('wattCounter');
+    const confettiContainer = document.getElementById('confettiContainer');
+    const live = document.getElementById('live');
+    const btnEnable = document.getElementById('enableMotion');
+    const btnTap = document.getElementById('tapCharge');
+    const btnReset = document.getElementById('resetBtn');
+    const progressEl = document.querySelector('.noteWrap');
+    let celebrationTriggered = false;
+    let lastAddTs = 0;
 
-  // Calibración anti-ruido
-  let calibrating = false, calStart = 0, calSamples = [], noiseThreshold = 0.35;
-  const maxDeltaPerEvent = 3.0, maxPerSecond = 38.0; let addedThisSecond = 0, lastSec = 0;
+    // --- Utilidades ---
+    const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 
-  function prepareNote(){
-    const raw = document.getElementById('noteRaw'); if(!raw) return;
-    maskGeom.innerHTML = raw.innerHTML; outlineGeom.innerHTML = raw.innerHTML;
+    function animateUI() {
+      if (displayWatts < watts) {
+        const delta = Math.max(1, (watts - displayWatts) * 0.15);
+        displayWatts = clamp(displayWatts + delta, 0, watts);
+        updateProgress(displayWatts);
+        requestAnimationFrame(animateUI);
+      } else {
+        updateProgress(displayWatts);
+      }
+    }
 
-    // Máscara sólida y redondeada
-    maskGeom.querySelectorAll('*').forEach(el => {
-      el.setAttribute('fill','#fff'); el.setAttribute('stroke','#fff');
-      el.setAttribute('stroke-linejoin','round'); el.setAttribute('stroke-linecap','round');
-      const sw = parseFloat(el.getAttribute('stroke-width')) || 0;
-      if(sw < 22) el.setAttribute('stroke-width','22');
+    function updateProgress(current) {
+      const percent = Math.min((current / maxWatts) * 100, 100);
+      noteFill.style.transform = `scaleY(${percent/100})`;
+
+      wattCounter.textContent = Math.round(current);
+      progressEl.setAttribute('aria-valuenow', Math.round(current));
+
+      if (current >= maxWatts && !celebrationTriggered) {
+        celebrationTriggered = true;
+        live.textContent = '¡Meta alcanzada!';
+        triggerMusicConfetti();
+        if (navigator.vibrate) navigator.vibrate([30, 40, 30]);
+      }
+    }
+
+    function addEnergy(amount = 1) {
+      if (celebrationTriggered) return;
+      watts = clamp(watts + amount, 0, maxWatts);
+      if (navigator.vibrate && watts % 25 === 0) navigator.vibrate(10);
+      requestAnimationFrame(animateUI);
+    }
+
+    // ---- Confetti musical ----
+    function triggerMusicConfetti() {
+      const chars = ['♪', '♫', '🎵', '🎶']; // set de notas
+      const colors = ['#00ffcc', '#ffffff', '#ffd54f', '#c3f8ff']; // turquesa, blanco, dorado suave, celeste
+      const N = 70;
+
+      for (let i = 0; i < N; i++) {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'note';
+        wrapper.style.left = Math.random() * 100 + 'vw';
+        wrapper.style.animationDuration = (Math.random() * 1.5 + 1.6) + 's';
+
+        const glyph = document.createElement('span');
+        glyph.className = 'glyph';
+        glyph.textContent = chars[(Math.random() * chars.length) | 0];
+        glyph.style.fontSize = (Math.random() * 20 + 18) + 'px';
+        glyph.style.animationDuration = (Math.random() * 1.2 + 0.8) + 's';
+        glyph.style.color = colors[(Math.random() * colors.length) | 0];
+
+        wrapper.appendChild(glyph);
+        confettiContainer.appendChild(wrapper);
+
+        setTimeout(() => wrapper.remove(), 4000);
+      }
+    }
+
+    // --- Movimiento: iOS permiso + filtro gravedad ---
+    let gravity = { x: 0, y: 0, z: 0 };
+    const ALPHA = 0.8;    // low-pass para estimar gravedad
+    const THRESH = 2.0;   // umbral
+
+    function onMotion(event) {
+      const now = performance.now();
+      const intervalOk = (now - lastAddTs) > 80; // throttle
+
+      let ax, ay, az;
+      if (event.acceleration && event.acceleration.x !== null) {
+        ax = event.acceleration.x; ay = event.acceleration.y; az = event.acceleration.z;
+      } else if (event.accelerationIncludingGravity) {
+        const a = event.accelerationIncludingGravity;
+        gravity.x = ALPHA * gravity.x + (1 - ALPHA) * a.x;
+        gravity.y = ALPHA * gravity.y + (1 - ALPHA) * a.y;
+        gravity.z = ALPHA * gravity.z + (1 - ALPHA) * a.z;
+        ax = a.x - gravity.x; ay = a.y - gravity.y; az = a.z - gravity.z;
+      } else {
+        return;
+      }
+
+      const mag = Math.hypot(ax, ay, az);
+      if (mag > THRESH && intervalOk && !celebrationTriggered) {
+        const bonus = clamp((mag - THRESH) / 3, 0.5, 3); // escala por intensidad
+        addEnergy(bonus);
+        lastAddTs = now;
+      }
+    }
+
+    async function enableMotionIfNeeded() {
+      const needsPermission =
+        typeof DeviceMotionEvent !== 'undefined' &&
+        typeof DeviceMotionEvent.requestPermission === 'function';
+
+      if (needsPermission) {
+        btnEnable.style.display = '';
+      } else {
+        btnEnable.style.display = 'none';
+        attachMotion();
+      }
+    }
+
+    async function requestPermission() {
+      try {
+        const res = await DeviceMotionEvent.requestPermission();
+        if (res === 'granted') {
+          attachMotion();
+          btnEnable.style.display = 'none';
+        } else {
+          alert('No se habilitó el sensor. Usa 🎵 Cargar o la tecla Espacio.');
+        }
+      } catch {
+        alert('No se pudo pedir permiso al sensor.');
+      }
+    }
+
+    function attachMotion() {
+      window.addEventListener('devicemotion', onMotion, { once: false });
+    }
+
+    // --- Fallbacks & reset ---
+    btnEnable.addEventListener('click', requestPermission);
+    btnTap.addEventListener('click', () => addEnergy(2));
+    btnReset.addEventListener('click', resetAll);
+
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Space') { e.preventDefault(); addEnergy(2); }
+      if (e.key.toLowerCase() === 'r') resetAll();
     });
 
-    // Contorno (estandarizado, aunque oculto)
-    outlineGeom.querySelectorAll('*').forEach(el => {
-      el.setAttribute('fill','none'); el.setAttribute('stroke','#FFFFFF');
-      el.setAttribute('stroke-linejoin','round'); el.setAttribute('stroke-linecap','round');
-      if(!el.hasAttribute('stroke-width')) el.setAttribute('stroke-width','6');
-    });
-
-    // Ajustar al lienzo
-    requestAnimationFrame(() => {
-      let vb; try { vb = outlineGeom.getBBox(); } catch { return; }
-      const padding = 10, target = 300;
-      const scale = Math.min((target-2*padding)/vb.width, (target-2*padding)/vb.height);
-      const tx = (target - vb.width*scale)/2 - vb.x*scale;
-      const ty = (target - vb.height*scale)/2 - vb.y*scale;
-      const tfm = `translate(${tx},${ty}) scale(${scale})`;
-      maskGeom.setAttribute('transform', tfm);
-      outlineGeom.setAttribute('transform', tfm);
-
-      requestAnimationFrame(() => {
-        try{
-          const o = document.getElementById('noteOutline').getBBox();
-          bbox = o;
-          fillRect.setAttribute('x', bbox.x);
-          fillRect.setAttribute('width', bbox.width);
-          updateFill(0);
-        }catch{}
-      });
-    });
-  }
-
-  function updateFill(p){
-    const now = Date.now(); const sec = Math.floor(now/1000);
-    if(sec !== lastSec){ lastSec = sec; addedThisSecond = 0; }
-    progress = Math.max(0, Math.min(100, p));
-    if(!bbox) return;
-
-    const h = bbox.height * (progress/100);
-    const y = bbox.y + bbox.height - h;
-    fillRect.setAttribute('y', y);
-    fillRect.setAttribute('height', h);
-
-    if(progress >= 100 && !finished){
-      finished = true;
-      showWin(); startConfetti(2400);
-      btnRestart.hidden = false;
-      window.removeEventListener('devicemotion', onMotion, true);
+    function resetAll() {
+      watts = 0; displayWatts = 0; celebrationTriggered = false;
+      updateProgress(0);
+      live.textContent = 'Reiniciada.';
     }
-  }
 
-  function addProgress(delta){
-    if (finished) return;
-    const now = Date.now(); const sec = Math.floor(now/1000);
-    if(sec !== lastSec){ lastSec = sec; addedThisSecond = 0; }
-    const capped = Math.min(maxDeltaPerEvent, delta);
-    if(addedThisSecond >= maxPerSecond) return;
-    const room = maxPerSecond - addedThisSecond;
-    const finalDelta = Math.max(0, Math.min(capped, room));
-    if(finalDelta > 0){ addedThisSecond += finalDelta; updateFill(progress + finalDelta); }
-  }
-
-  function startCalibration(){ calibrating = true; calStart = Date.now(); calSamples.length = 0; }
-  function endCalibration(){
-    calibrating = false;
-    if(calSamples.length > 8){
-      calSamples.sort((a,b)=>a-b);
-      const median = calSamples[Math.floor(calSamples.length/2)];
-      const absDevs = calSamples.map(v => Math.abs(v - median)).sort((a,b)=>a-b);
-      const mad = absDevs[Math.floor(absDevs.length/2)] || 0;
-      noiseThreshold = Math.max(0.35, median + 2.5*mad);
-    } else { noiseThreshold = 0.5; }
-  }
-
-  function onMotion(e){
-    const a = e.acceleration && (e.acceleration.x !== null) ? e.acceleration : e.accelerationIncludingGravity;
-    if(!a) return;
-    const now = Date.now(); if(now - lastTime < 50) return; lastTime = now;
-
-    if(lastAccel.x === null){ lastAccel = {x:a.x||0, y:a.y||0, z:a.z||0}; return; }
-    const dx = (a.x||0) - lastAccel.x, dy = (a.y||0) - lastAccel.y, dz = (a.z||0) - lastAccel.z;
-    lastAccel = {x:a.x||0, y:a.y||0, z:a.z||0};
-
-    const intensity = Math.sqrt(dx*dx + dy*dy + dz*dz);
-    const factor = 1.2; let delta = Math.max(0, (intensity - noiseThreshold) * factor);
-
-    if(calibrating){ if(now - calStart < 800){ calSamples.push(intensity); return; } else { endCalibration(); } }
-    if(delta > 0 && (now - lastPeakTime) >= 140){ lastPeakTime = now; addProgress(Math.min(delta, 3.0)); }
-  }
-
-  function isIOS(){
-    const ua = navigator.userAgent || navigator.vendor || window.opera;
-    return /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-  }
-  async function requestPermissionIOS(){
-    if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function'){
-      try{ const s = await DeviceMotionEvent.requestPermission(); return s === 'granted'; }
-      catch{ return false; }
-    }
-    return true;
-  }
-  function enableMotion(){ if(enabled) return; enabled = true; window.addEventListener('devicemotion', onMotion, true); startCalibration(); }
-  function disableMotion(){ enabled = false; window.removeEventListener('devicemotion', onMotion, true); }
-  function resetAll(){ finished = false; btnRestart.hidden = true; hideWin(); updateFill(0); startCalibration(); }
-  btnRestart.addEventListener('click', resetAll);
-  document.addEventListener('visibilitychange', () => { if(document.hidden) disableMotion(); else if(!enabled) enableAutoMotion(); });
-
-  // Confetti
-  const canvas = document.getElementById('confettiCanvas'); const ctx = canvas.getContext('2d');
-  let confettiPieces = [], animId = null;
-  function resizeCanvas(){ canvas.width = window.innerWidth; canvas.height = window.innerHeight; } window.addEventListener('resize', resizeCanvas); resizeCanvas();
-  function randomRange(min, max){ return Math.random() * (max - min) + min; }
-  function createConfetti(count){
-    const colors = ['#0057D2','#0070F2','#4DB1FF','#89D1FF','#FFFFFF'];
-    const pieces = [];
-    for(let i=0;i<count;i++){
-      pieces.push({ x: Math.random()*canvas.width, y: randomRange(-20, -canvas.height*0.3), size: randomRange(6, 12), color: colors[i % colors.length], speedX: randomRange(-1, 1), speedY: randomRange(2, 5), rot: randomRange(0, Math.PI*2), rotSpeed: randomRange(-0.2, 0.2) });
-    }
-    return pieces;
-  }
-  function drawConfetti(){
-    ctx.clearRect(0,0,canvas.width, canvas.height);
-    for(const p of confettiPieces){
-      p.x+=p.speedX; p.y+=p.speedY; p.rot+=p.rotSpeed;
-      if(p.y>canvas.height+20){ p.y=-10; p.x=Math.random()*canvas.width; }
-      ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot); ctx.fillStyle=p.color; ctx.fillRect(-p.size/2,-p.size/2,p.size,p.size); ctx.restore();
-    }
-    animId=requestAnimationFrame(drawConfetti);
-  }
-  function startConfetti(ms=2400){
-    confettiPieces = createConfetti(160); if(animId) cancelAnimationFrame(animId); drawConfetti();
-    setTimeout(()=>{ const fade=setInterval(()=>{ confettiPieces.forEach(p=>p.speedY*=0.92); if(confettiPieces.every(p=>p.speedY<0.2)){ clearInterval(fade); if(animId) cancelAnimationFrame(animId); ctx.clearRect(0,0,canvas.width, canvas.height); confettiPieces=[]; } },60); }, ms);
-  }
-  function showWin(){ win.classList.add('show'); } function hideWin(){ win.classList.remove('show'); }
-
-  // Auto-start sensores
-  function enableAutoMotion(){
-    if(isIOS()){
-      overlay.classList.add('show');
-      const start = () => {
-        overlay.classList.remove('show');
-        window.removeEventListener('pointerdown', start, true);
-        requestPermissionIOS().then(g => { if(g) enableMotion(); });
-      };
-      window.addEventListener('pointerdown', start, true);
-    } else { enableMotion(); }
-  }
-
-  window.addEventListener('load', () => { prepareNote(); enableAutoMotion(); });
-})();
-</script>
+    // Init
+    updateProgress(0);
+    enableMotionIfNeeded();
+  </script>
 </body>
 </html>
 
