@@ -3,339 +3,152 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Energía Colectiva - Corchea V6 (SVG real)</title>
-  <meta name="theme-color" content="#4e0199" />
-  <link rel="preload" as="image" href="corchea.svg" />
+  <title>Melodía Colectiva</title>
   <style>
-    :root { --bg1:#4e0199; --bg2:#00b0ca; --fill:#00ffcc; }
-    * { box-sizing: border-box; }
     body {
-      margin: 0; font-family: 'Segoe UI', system-ui, sans-serif;
-      background: linear-gradient(to bottom right, var(--bg1), var(--bg2));
-      color: #fff; text-align: center; padding: 20px; overflow-x: hidden;
-    }
-    .logo { margin-top: 10px; max-width: 60vw; height: auto; }
-    h1 { margin: 16px 0 8px; }
-    .hint { font-size: 18px; margin-top: 8px; opacity: .9; }
-    .controls { margin: 16px 0; display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
-    .btn {
-      appearance: none; border: 0; border-radius: 12px; padding: 12px 16px;
-      font-weight: 600; cursor: pointer; background: rgba(255,255,255,.15);
-      color: #fff; backdrop-filter: blur(6px);
-    }
-    .btn:focus { outline: 2px solid #fff; outline-offset: 2px; }
-
-    /* ---- CORCHEA (progreso) ---- */
-    .noteWrap {
-      margin: 24px auto; width: min(80%, 420px);
-      /* se ajusta al viewBox de tu SVG (ej: 450 x 675) => 2:3 */
-      aspect-ratio: 2 / 3; position: relative; visibility: hidden; /* visible al cargar */
-    }
-    .noteWrap.ready { visibility: visible; }
-    .noteWrap svg { width: 100%; height: 100%; display: block; }
-    .noteOutline { stroke:#fff; stroke-width:6; fill:transparent; opacity:.95; }
-    .noteBack { fill: rgba(255,255,255,.08); }
-    .noteFill {
-      fill: var(--fill);
-      transform-box: fill-box; transform-origin: center bottom;
-      transform: scaleY(0); transition: transform .25s ease-out;
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to bottom right, #2c3e50, #3498db);
+      color: white;
+      text-align: center;
+      padding: 20px;
+      overflow-x: hidden;
     }
 
-    .watts { font-size: 24px; margin-top: 12px; }
-    .footer { margin-top: 40px; font-size: 14px; opacity: .7; }
+    .logo {
+      margin-top: 10px;
+      max-width: 200px;
+      opacity: 0.8;
+    }
 
-    /* ---- CONFETTI MUSICAL ---- */
-    .confetti { position: fixed; inset: 0; pointer-events: none; z-index: 9999; overflow: hidden; }
-    .note { position: absolute; top: -10vh; animation: fall 2.2s linear both; }
-    .glyph { display:inline-block; will-change: transform; animation: sway 1.2s ease-in-out infinite alternate; }
+    .music-note-container {
+      margin: 30px auto;
+      width: 80%;
+      max-width: 250px; /* Ajustado para la forma de la nota */
+    }
+
+    #quaverNote path {
+      stroke: white;
+      stroke-width: 5;
+    }
+    
+    .beats {
+      font-size: 24px;
+      margin-top: 20px;
+    }
+
+    .hint {
+      font-size: 18px;
+      margin-top: 20px;
+    }
+
+    .footer {
+      margin-top: 50px;
+      font-size: 14px;
+      opacity: 0.6;
+    }
+
+    .confetti {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    .note {
+      position: absolute;
+      font-size: 32px;
+      animation: fall 3s linear infinite;
+      color: #f1c40f; /* Color dorado para las notas */
+    }
 
     @keyframes fall {
-      0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
+      0% { transform: translateY(-10vh) rotate(0); opacity: 1; }
       100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
     }
-    @keyframes sway {
-      0% { transform: translateX(-10px) rotate(-10deg) scale(1); }
-      100% { transform: translateX(10px) rotate(10deg) scale(1.05); }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .note, .glyph { display: none !important; }
-      .noteFill { transition: none; }
-    }
-    .sr { position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden; }
-    .loading { font-size:14px; opacity:.8; }
   </style>
 </head>
 <body>
-  <img class="logo" src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/ed/Siemens_Energy_logo_2020.svg/2560px-Siemens_Energy_logo_2020.svg.png" alt="Siemens Energy" width="200" />
-  <h1>¡Activa tu Energía!</h1>
-  <p class="hint">Sacude tu celular o toca el botón para llenar la corchea colectiva 🎵</p>
+  <h1>¡Crea la Melodía!</h1>
+  <p class="hint">Sacude tu celular para componer la melodía colectiva 🎶</p>
 
-  <div class="controls">
-    <button id="enableMotion" class="btn">⚙️ Activar sensores</button>
-    <button id="tapCharge" class="btn" title="Usar toque/teclado (Espacio)">🎵 Cargar</button>
-    <button id="resetBtn" class="btn" title="Reinicia (R)">↺ Reset</button>
-  </div>
-
-  <!-- Contenedor del progreso (se completa con paths del SVG real) -->
-  <div
-    class="noteWrap"
-    role="progressbar"
-    aria-label="Corchea colectiva"
-    aria-valuemin="0"
-    aria-valuemax="500"
-    aria-valuenow="0"
-  >
-    <div class="loading" id="loadingMsg">Cargando corchea…</div>
-    <svg id="noteSvg" viewBox="0 0 450 675" aria-hidden="true">
+  <div class="music-note-container">
+    <svg id="quaverNote" viewBox="0 0 100 150" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <clipPath id="noteClip" clipPathUnits="userSpaceOnUse"></clipPath>
+        <linearGradient id="fillGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop id="fillStop1" offset="100%" stop-color="#2ecc71" />
+          <stop id="fillStop2" offset="100%" stop-color="rgba(255, 255, 255, 0.1)" />
+        </linearGradient>
       </defs>
-
-      <!-- Fondo leve (se pobla con paths) -->
-      <g class="noteBackGroup"></g>
-
-      <!-- Relleno animado recortado por la corchea -->
-      <g clip-path="url(#noteClip)">
-        <!-- el tamaño se ajusta al viewBox real del SVG -->
-        <rect id="noteFill" class="noteFill" x="0" y="0" width="450" height="675" />
-      </g>
-
-      <!-- Contorno (se pobla con paths) -->
-      <g class="noteOutlineGroup"></g>
+      <path d="M 62.5,3.125 C 75.75,11.875 75,24.25 75.625,37.5 L 75.625,106.25 C 75.625,120.75 62.5,125 50,125 C 34.375,125 25,119.375 25,106.25 C 25,93.75 35.625,87.5 50,87.5 C 53.125,87.5 59.375,88.125 59.375,93.75 L 59.375,3.125 L 62.5,3.125 z" 
+            fill="url(#fillGradient)" />
     </svg>
   </div>
 
-  <div class="watts"><span id="wattCounter">0</span> Watts generados</div>
+  <div class="beats">
+    <span id="beatCounter">0</span> Beats generados
+  </div>
+
   <div class="confetti" id="confettiContainer"></div>
 
-  <p class="sr" aria-live="polite" id="live"></p>
-  <div class="footer">Siemens Energy OpenDay 2025</div>
+  <div class="footer">Music Jam Session 2025</div>
 
   <script>
-    // --- Estado ---
-    let watts = 0, displayWatts = 0;
-    const maxWatts = 500;
-    const wattCounter = document.getElementById('wattCounter');
+    let beats = 0;
+    const maxBeats = 500;
+    const fillStop1 = document.getElementById('fillStop1');
+    const fillStop2 = document.getElementById('fillStop2');
+    const beatCounter = document.getElementById('beatCounter');
     const confettiContainer = document.getElementById('confettiContainer');
-    const live = document.getElementById('live');
-    const btnEnable = document.getElementById('enableMotion');
-    const btnTap = document.getElementById('tapCharge');
-    const btnReset = document.getElementById('resetBtn');
-    const progressWrap = document.querySelector('.noteWrap');
-    const noteSvg = document.getElementById('noteSvg');
-    const noteFill = document.getElementById('noteFill');
-    const noteClip = document.getElementById('noteClip');
-    const backGroup = noteSvg.querySelector('.noteBackGroup');
-    const outlineGroup = noteSvg.querySelector('.noteOutlineGroup');
-    const loadingMsg = document.getElementById('loadingMsg');
     let celebrationTriggered = false;
-    let lastAddTs = 0;
 
-    const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
-
-    // ---- Carga del SVG real y armado de la silueta ----
-    async function loadRealNote() {
-      try {
-        const res = await fetch('corchea.svg', { cache: 'force-cache' });
-        if (!res.ok) throw new Error('No se pudo cargar corchea.svg');
-        const svgText = await res.text();
-        const doc = new DOMParser().parseFromString(svgText, 'image/svg+xml');
-        const srcSvg = doc.querySelector('svg');
-        if (!srcSvg) throw new Error('SVG inválido');
-
-        const vb = (srcSvg.getAttribute('viewBox') || '0 0 450 675').trim().split(/\s+/).map(parseFloat);
-        const [minX, minY, vbW, vbH] = vb.length === 4 ? vb : [0,0,450,675];
-
-        // Ajustar viewBox y tamaño del rect de relleno
-        noteSvg.setAttribute('viewBox', `${minX} ${minY} ${vbW} ${vbH}`);
-        noteFill.setAttribute('x', minX);
-        noteFill.setAttribute('y', minY);
-        noteFill.setAttribute('width', vbW);
-        noteFill.setAttribute('height', vbH);
-
-        // Tomamos los path "grandes" (la corchea). Si tu archivo tiene más formas, filtramos por longitud.
-        const allPaths = Array.from(doc.querySelectorAll('path'));
-        const bigPaths = allPaths.filter(p => (p.getAttribute('d') || '').length > 500);
-        const usePaths = bigPaths.length ? bigPaths : allPaths; // fallback por si no hay "grandes"
-
-        // Poblar clipPath, fondo y contorno
-        usePaths.forEach(p => {
-          const d = p.getAttribute('d');
-          if (!d) return;
-
-          const c = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-          c.setAttribute('d', d);
-          noteClip.appendChild(c);
-
-          const b = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-          b.setAttribute('d', d);
-          b.setAttribute('class', 'noteBack');
-          backGroup.appendChild(b);
-
-          const o = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-          o.setAttribute('d', d);
-          o.setAttribute('class', 'noteOutline');
-          outlineGroup.appendChild(o);
-        });
-
-        // Mostrar
-        progressWrap.classList.add('ready');
-        if (loadingMsg) loadingMsg.remove();
-      } catch (err) {
-        // Fallback: dibuja una corchea genérica para no dejar en blanco
-        console.warn(err);
-        const vb = [0,0,200,320];
-        noteSvg.setAttribute('viewBox', vb.join(' '));
-        noteFill.setAttribute('x', 0); noteFill.setAttribute('y', 0);
-        noteFill.setAttribute('width', 200); noteFill.setAttribute('height', 320);
-
-        const pieces = [
-          'M126 70 C185 70, 170 120, 128 138 C185 138, 170 188, 128 206 L126 186 C160 170, 150 145, 122 138 L122 70 Z',
-          'M116 70 h20 a10 10 0 0 1 10 10 v200 a10 10 0 0 1 -10 10 h-20 a10 10 0 0 1 -10 -10 v-200 a10 10 0 0 1 10 -10 z',
-          'M72 262 a52 38 0 1 0 104 0 a52 38 0 1 0 -104 0 z'
-        ];
-        pieces.forEach(d => {
-          const c = document.createElementNS('http://www.w3.org/2000/svg', 'path'); c.setAttribute('d', d); noteClip.appendChild(c);
-          const b = document.createElementNS('http://www.w3.org/2000/svg', 'path'); b.setAttribute('d', d); b.setAttribute('class','noteBack'); backGroup.appendChild(b);
-          const o = document.createElementNS('http://www.w3.org/2000/svg', 'path'); o.setAttribute('d', d); o.setAttribute('class','noteOutline'); outlineGroup.appendChild(o);
-        });
-        progressWrap.classList.add('ready');
-        if (loadingMsg) loadingMsg.textContent = 'Usando silueta genérica (no se pudo cargar corchea.svg)';
-      }
-    }
-
-    function animateUI() {
-      if (displayWatts < watts) {
-        const delta = Math.max(1, (watts - displayWatts) * 0.15);
-        displayWatts = clamp(displayWatts + delta, 0, watts);
-        updateProgress(displayWatts);
-        requestAnimationFrame(animateUI);
-      } else {
-        updateProgress(displayWatts);
-      }
-    }
-
-    function updateProgress(current) {
-      const percent = Math.min((current / maxWatts) * 100, 100);
-      noteFill.style.transform = `scaleY(${percent/100})`;
-      wattCounter.textContent = Math.round(current);
-      progressWrap.setAttribute('aria-valuenow', Math.round(current));
-
-      if (current >= maxWatts && !celebrationTriggered) {
+    function updateNoteFill() {
+      // Calcula el porcentaje y lo invierte (100% -> 0%, 0% -> 100%)
+      // porque el degradado se llena desde el punto de offset hacia abajo.
+      let percent = 100 - Math.min((beats / maxBeats) * 100, 100);
+      const percentString = percent + '%';
+      
+      fillStop1.setAttribute('offset', percentString);
+      fillStop2.setAttribute('offset', percentString);
+      
+      if (beats >= maxBeats && !celebrationTriggered) {
         celebrationTriggered = true;
-        live.textContent = '¡Meta alcanzada!';
         triggerMusicConfetti();
-        if (navigator.vibrate) navigator.vibrate([30, 40, 30]);
       }
     }
 
-    function addEnergy(amount = 1) {
-      if (celebrationTriggered) return;
-      watts = clamp(watts + amount, 0, maxWatts);
-      if (navigator.vibrate && watts % 25 === 0) navigator.vibrate(10);
-      requestAnimationFrame(animateUI);
-    }
-
-    // ---- Confetti musical ----
     function triggerMusicConfetti() {
-      const chars = ['♪', '♫', '🎵', '🎶'];
-      const colors = ['#00ffcc', '#ffffff', '#ffd54f', '#c3f8ff'];
-      const N = 70;
-      for (let i = 0; i < N; i++) {
-        const wrapper = document.createElement('div');
-        wrapper.className = 'note';
-        wrapper.style.left = Math.random() * 100 + 'vw';
-        wrapper.style.animationDuration = (Math.random() * 1.5 + 1.6) + 's';
-        const glyph = document.createElement('span');
-        glyph.className = 'glyph';
-        glyph.textContent = chars[(Math.random() * chars.length) | 0];
-        glyph.style.fontSize = (Math.random() * 20 + 18) + 'px';
-        glyph.style.animationDuration = (Math.random() * 1.2 + 0.8) + 's';
-        glyph.style.color = colors[(Math.random() * colors.length) | 0];
-        wrapper.appendChild(glyph);
-        confettiContainer.appendChild(wrapper);
-        setTimeout(() => wrapper.remove(), 4000);
+      const musicNotes = ['🎵', '🎶', '🎼', '🎹'];
+      for (let i = 0; i < 60; i++) {
+        const note = document.createElement('div');
+        note.classList.add('note');
+        note.style.left = Math.random() * 100 + 'vw';
+        note.style.animationDuration = (Math.random() * 2 + 2) + 's'; // Duración entre 2 y 4 segundos
+        note.style.fontSize = (Math.random() * 24 + 24) + 'px';
+        note.textContent = musicNotes[Math.floor(Math.random() * musicNotes.length)];
+        confettiContainer.appendChild(note);
+
+        setTimeout(() => note.remove(), 4000);
       }
     }
 
-    // --- Movimiento: iOS permiso + filtro gravedad ---
-    let gravity = { x: 0, y: 0, z: 0 };
-    const ALPHA = 0.8;
-    const THRESH = 2.0;
+    if (window.DeviceMotionEvent) {
+      window.addEventListener('devicemotion', (event) => {
+        const acc = event.accelerationIncludingGravity;
+        const shakePower = Math.abs(acc.x) + Math.abs(acc.y) + Math.abs(acc.z);
 
-    function onMotion(event) {
-      const now = performance.now();
-      const intervalOk = (now - lastAddTs) > 80;
-      let ax, ay, az;
-      if (event.acceleration && event.acceleration.x !== null) {
-        ax = event.acceleration.x; ay = event.acceleration.y; az = event.acceleration.z;
-      } else if (event.accelerationIncludingGravity) {
-        const a = event.accelerationIncludingGravity;
-        gravity.x = ALPHA * gravity.x + (1 - ALPHA) * a.x;
-        gravity.y = ALPHA * gravity.y + (1 - ALPHA) * a.y;
-        gravity.z = ALPHA * gravity.z + (1 - ALPHA) * a.z;
-        ax = a.x - gravity.x; ay = a.y - gravity.y; az = a.z - gravity.z;
-      } else { return; }
-      const mag = Math.hypot(ax, ay, az);
-      if (mag > THRESH && intervalOk && !celebrationTriggered) {
-        const bonus = clamp((mag - THRESH) / 3, 0.5, 3);
-        addEnergy(bonus);
-        lastAddTs = now;
-      }
-    }
-
-    async function enableMotionIfNeeded() {
-      const needsPermission =
-        typeof DeviceMotionEvent !== 'undefined' &&
-        typeof DeviceMotionEvent.requestPermission === 'function';
-      if (needsPermission) {
-        btnEnable.style.display = '';
-      } else {
-        btnEnable.style.display = 'none';
-        attachMotion();
-      }
-    }
-
-    async function requestPermission() {
-      try {
-        const res = await DeviceMotionEvent.requestPermission();
-        if (res === 'granted') {
-          attachMotion();
-          btnEnable.style.display = 'none';
-        } else {
-          alert('No se habilitó el sensor. Usa 🎵 Cargar o la tecla Espacio.');
+        if (shakePower > 30 && !celebrationTriggered) {
+          beats = Math.min(beats + 1, maxBeats);
+          beatCounter.innerText = beats;
+          updateNoteFill();
         }
-      } catch {
-        alert('No se pudo pedir permiso al sensor.');
-      }
+      });
+    } else {
+      alert('Tu dispositivo no soporta el sensor de movimiento.');
     }
-
-    function attachMotion() {
-      window.addEventListener('devicemotion', onMotion, { once: false });
-    }
-
-    // --- Fallbacks & reset ---
-    btnEnable.addEventListener('click', requestPermission);
-    btnTap.addEventListener('click', () => addEnergy(2));
-    btnReset.addEventListener('click', resetAll);
-    window.addEventListener('keydown', (e) => {
-      if (e.code === 'Space') { e.preventDefault(); addEnergy(2); }
-      if (e.key.toLowerCase() === 'r') resetAll();
-    });
-
-    function resetAll() {
-      watts = 0; displayWatts = 0; celebrationTriggered = false;
-      updateProgress(0);
-      live.textContent = 'Reiniciada.';
-    }
-
-    // Init
-    (async () => {
-      updateProgress(0);
-      enableMotionIfNeeded();
-      await loadRealNote(); // <- aquí cargamos e inyectamos la corchea REAL
-    })();
   </script>
 </body>
 </html>
