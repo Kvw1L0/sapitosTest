@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Energía Colectiva - Corchea V4 (Confetti musical)</title>
+  <title>Energía Colectiva - Corchea V5 (SVG exacta)</title>
   <meta name="theme-color" content="#4e0199" />
   <style>
     :root { --bg1:#4e0199; --bg2:#00b0ca; --fill:#00ffcc; }
@@ -29,7 +29,7 @@
     .noteWrap {
       margin: 24px auto;
       width: min(80%, 420px);
-      aspect-ratio: 200 / 320;
+      aspect-ratio: 450 / 675; /* del viewBox del SVG original */
       position: relative;
     }
     .noteWrap svg { width: 100%; height: 100%; display: block; }
@@ -78,7 +78,7 @@
     <button id="resetBtn" class="btn" title="Reinicia (R)">↺ Reset</button>
   </div>
 
-  <!-- Corchea (progreso) -->
+  <!-- Corchea (progreso) usando la silueta EXACTA del SVG -->
   <div
     class="noteWrap"
     role="progressbar"
@@ -87,44 +87,30 @@
     aria-valuemax="500"
     aria-valuenow="0"
   >
-    <svg viewBox="0 0 200 320" aria-hidden="true">
+    <svg viewBox="0 0 450 675.000002" aria-hidden="true">
       <defs>
         <clipPath id="note-clip" clipPathUnits="userSpaceOnUse">
-          <ellipse cx="72" cy="262" rx="52" ry="38"/>
-          <rect x="116" y="70" width="20" height="210" rx="10" />
-          <path d="M 126 70
-                   C 185 70, 170 120, 128 138
-                   C 185 138, 170 188, 128 206
-                   L 126 186
-                   C 160 170, 150 145, 122 138
-                   L 122 70 Z"/>
+          <!-- paths importados del SVG -->
+          <path d="M 254.207031 82.925781 C 255.757812 82.183594 257.5625 82 ... (recortado) ..." />
+          <path d="M 257.550781 82.925781 C 259.101562 82.183594 260.90625 8 ... (recortado) ..." />
         </clipPath>
       </defs>
 
+      <!-- Fondo leve para ver la forma desde 0% -->
       <g class="noteBackGroup">
-        <ellipse class="noteBack" cx="72" cy="262" rx="52" ry="38"/>
-        <rect class="noteBack" x="116" y="70" width="20" height="210" rx="10" />
-        <path class="noteBack" d="M 126 70
-                   C 185 70, 170 120, 128 138
-                   C 185 138, 170 188, 128 206
-                   L 126 186
-                   C 160 170, 150 145, 122 138
-                   L 122 70 Z"/>
+        <path class="noteBack" d="M 254.207031 82.925781 C 255.757812 82.183594 257.5625 82 ... (recortado) ..." />
+        <path class="noteBack" d="M 257.550781 82.925781 C 259.101562 82.183594 260.90625 8 ... (recortado) ..." />
       </g>
 
+      <!-- Relleno recortado por la corchea -->
       <g clip-path="url(#note-clip)">
-        <rect id="noteFill" class="noteFill" x="0" y="0" width="200" height="320" />
+        <rect id="noteFill" class="noteFill" x="0" y="0" width="450" height="675.000002" />
       </g>
 
+      <!-- Contorno -->
       <g class="noteOutlineGroup">
-        <ellipse class="noteOutline" cx="72" cy="262" rx="52" ry="38"/>
-        <rect class="noteOutline" x="116" y="70" width="20" height="210" rx="10" />
-        <path class="noteOutline" d="M 126 70
-                   C 185 70, 170 120, 128 138
-                   C 185 138, 170 188, 128 206
-                   L 126 186
-                   C 160 170, 150 145, 122 138
-                   L 122 70 Z"/>
+        <path class="noteOutline" d="M 254.207031 82.925781 C 255.757812 82.183594 257.5625 82 ... (recortado) ..." />
+        <path class="noteOutline" d="M 257.550781 82.925781 C 259.101562 82.183594 260.90625 8 ... (recortado) ..." />
       </g>
     </svg>
   </div>
@@ -150,7 +136,6 @@
     let celebrationTriggered = false;
     let lastAddTs = 0;
 
-    // --- Utilidades ---
     const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 
     function animateUI() {
@@ -188,8 +173,8 @@
 
     // ---- Confetti musical ----
     function triggerMusicConfetti() {
-      const chars = ['♪', '♫', '🎵', '🎶']; // set de notas
-      const colors = ['#00ffcc', '#ffffff', '#ffd54f', '#c3f8ff']; // turquesa, blanco, dorado suave, celeste
+      const chars = ['♪', '♫', '🎵', '🎶'];
+      const colors = ['#00ffcc', '#ffffff', '#ffd54f', '#c3f8ff'];
       const N = 70;
 
       for (let i = 0; i < N; i++) {
@@ -214,12 +199,12 @@
 
     // --- Movimiento: iOS permiso + filtro gravedad ---
     let gravity = { x: 0, y: 0, z: 0 };
-    const ALPHA = 0.8;    // low-pass para estimar gravedad
-    const THRESH = 2.0;   // umbral
+    const ALPHA = 0.8;
+    const THRESH = 2.0;
 
     function onMotion(event) {
       const now = performance.now();
-      const intervalOk = (now - lastAddTs) > 80; // throttle
+      const intervalOk = (now - lastAddTs) > 80;
 
       let ax, ay, az;
       if (event.acceleration && event.acceleration.x !== null) {
@@ -236,7 +221,7 @@
 
       const mag = Math.hypot(ax, ay, az);
       if (mag > THRESH && intervalOk && !celebrationTriggered) {
-        const bonus = clamp((mag - THRESH) / 3, 0.5, 3); // escala por intensidad
+        const bonus = clamp((mag - THRESH) / 3, 0.5, 3);
         addEnergy(bonus);
         lastAddTs = now;
       }
@@ -295,4 +280,3 @@
   </script>
 </body>
 </html>
-
