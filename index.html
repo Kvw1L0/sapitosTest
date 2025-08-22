@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>SAP Beats Challenge</title>
+  <title>SAP Speed Challenge</title>
   <style>
     :root {
       --sap-blue: #0077C6;
@@ -31,7 +31,7 @@
     /* --- Overlays --- */
     .overlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(30, 30, 30, 0.9); backdrop-filter: blur(8px);
+      background: rgba(30, 30, 30, 0.95); backdrop-filter: blur(10px);
       z-index: 10000; display: flex; flex-direction: column;
       justify-content: center; align-items: center; padding: 25px;
       box-sizing: border-box; transition: opacity 0.5s ease-out;
@@ -50,12 +50,12 @@
     }
     #startButton:active { transform: scale(0.95); }
 
-    #overlay-results h2 { font-size: 3em; text-shadow: 0 0 10px var(--glow-color); margin-bottom: 15px; }
-    #overlay-results p { font-size: 1.5em; opacity: 0.8; }
+    #overlay-results .final-time { font-size: 4em; font-weight: bold; color: var(--glow-color); text-shadow: 0 0 15px var(--glow-color); margin: 0; }
+    #overlay-results .final-text { font-size: 1.5em; opacity: 0.9; margin-top: 10px; }
 
     /* --- Contenido Principal --- */
     .app-header { width: 100%; }
-    .logo { max-width: 160px; opacity: 0.9; margin-top: 10px; }
+    .logo { width: 140px; height: auto; margin-top: 10px; }
     .game-area { display: flex; flex-direction: column; align-items: center; justify-content: center; flex-grow: 1; }
     .music-note-container {
       width: 180px;
@@ -66,10 +66,16 @@
       from { transform: scale(1); }
       to { transform: scale(1.03); }
     }
-    .beats-info { font-size: 1.5em; margin-top: 20px; text-shadow: 0 0 5px var(--glow-color); }
-    .timer { font-size: 2.5em; font-weight: bold; color: var(--sap-blue); text-shadow: 0 0 10px var(--sap-blue); margin: 10px 0; height: 40px;}
+    .stats-container {
+        display: flex;
+        justify-content: space-around;
+        width: 100%;
+        max-width: 350px;
+        margin-top: 20px;
+    }
+    .stat { font-size: 1.5em; text-shadow: 0 0 5px var(--glow-color); }
+    .stat-value { font-weight: bold; }
     .footer { width: 100%; font-size: 12px; opacity: 0.4; padding-bottom: 10px; }
-
     #confetti-canvas {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       pointer-events: none; z-index: 10001;
@@ -80,27 +86,26 @@
 
   <div id="overlay-start" class="overlay">
     <div class="overlay-content">
-      <h2>¡Desafío SAP Beats! 🥁</h2>
-      <p>Agita tu celular lo más rápido que puedas durante <strong>10 segundos</strong> para generar la mayor cantidad de beats. ¡Al finalizar, verás tu puntuación y podrás acceder al sorteo!</p>
-      <button id="startButton">¡A rockear!</button>
+      <h2>¡SAP Speed Challenge! ⚡</h2>
+      <p>El desafío es simple: ¡llena de energía la nota musical agitando tu celular <strong>lo más rápido que puedas</strong>! Tu tiempo corre desde el primer momento. ¡Demuestra tu velocidad para entrar al sorteo!</p>
+      <button id="startButton">¡Comenzar!</button>
     </div>
   </div>
 
   <div id="overlay-results" class="overlay hidden">
     <div class="overlay-content">
-      <h2 id="final-beats"></h2>
-      <p>¡Preparando el sorteo!</p>
+      <p class="final-text">¡Lo lograste en!</p>
+      <h2 class="final-time" id="final-time"></h2>
     </div>
   </div>
 
   <canvas id="confetti-canvas"></canvas>
 
   <header class="app-header">
-    <img class="logo" src="https://www.sap.com/dam/application/shared/logos/sap-logo.svg" alt="SAP Logo" />
+    <svg class="logo" viewBox="0 0 102.4 51.2" xmlns="http://www.w3.org/2000/svg"><path fill="#0077C6" d="M0 0h102.4v51.2H0z"/><path fill="#FFF" d="M29.5 38.3h-7.2L16.2 28l-6.1 10.3H3l13.2-21-12-21.2h7.2l8.1 12.8 8.1-12.8h7.2L23.3 28l12.3 21.5-6.1-11.2zm23.6 5.1c-4.2 0-7.3-1.3-9.3-3.8-2-2.5-3-6-3-10.3 0-4.3 1-7.8 3-10.4 2-2.6 5.1-3.9 9.3-3.9s7.3 1.3 9.3 3.9c2 2.6 3 6.1 3 10.4 0 4.3-1 7.8-3 10.3-2 2.5-5.1 3.8-9.3 3.8zm0-6.2c1.3 0 2.4-.6 3.2-1.7 1.7-2.3 2.5-5.4 2.5-9.2 0-3.8-.8-6.9-2.5-9.2-1.7-2.3-4.5-2.3-6.4 0-1.7 2.3-2.5 5.4-2.5 9.2s.8 6.9 2.5 9.2c.8 1.1 1.9 1.7 3.2 1.7zm25.8-18.3H64.6v-12H85v6.2H70.8v7.6h13.2v6.2H70.8v8.2H85v6.2H64.6V18.9z"/></svg>
   </header>
 
   <div class="game-area">
-    <div class="timer" id="timer">10</div>
     <div class="music-note-container">
       <svg id="userQuaver" viewBox="0 0 450 675" xmlns="http://www.w3.org/2000/svg">
         <defs>
@@ -110,14 +115,17 @@
           </linearGradient>
         </defs>
         <path
-          d="M 254.207031 82.925781 C 255.757812 82.183594 257.5625 82.199219 259.101562 82.964844 C 275.875 91.296875 300.304688 108.71875 319.824219 134.195312 C 339.398438 159.746094 354.203125 193.648438 350.992188 234.667969 C 348.054688 272.214844 361.496094 296.023438 379.054688 310.835938 C 396.886719 325.878906 419.390625 331.972656 434.5625 332.910156 C 437.113281 333.066406 439.234375 334.9375 439.714844 337.449219 C 440.191406 339.964844 438.90625 342.480469 436.589844 343.566406 C 416.050781 353.183594 383.800781 361.875 353.996094 355.953125 C 338.964844 352.96875 324.46875 346.242188 312.566406 333.980469 C 300.671875 321.726562 291.695312 304.285156 287.128906 280.417969 C 286.113281 275.113281 285.050781 271.0625 283.984375 268.101562 C 283.199219 265.917969 282.492188 264.558594 281.960938 263.761719 C 281.722656 264.007812 281.425781 264.335938 281.078125 264.777344 C 278.542969 267.996094 275.476562 274.253906 272.066406 283.492188 C 268.71875 292.5625 265.222656 303.980469 261.65625 317.085938 C 247.371094 369.578125 232.347656 447.574219 221.121094 505.886719 C 220.746094 507.824219 220.378906 509.742188 220.011719 511.636719 C 216.257812 557.539062 169.710938 592.164062 115.019531 592.164062 C 58.054688 592.164062 9.785156 554.511719 9.785156 505.742188 C 9.785156 456.972656 58.054688 419.320312 115.019531 419.320312 C 136.609375 419.320312 156.75 424.652344 173.523438 433.871094 L 251.15625 86.753906 C 251.53125 85.078125 252.65625 83.664062 254.207031 82.925781 Z"
+          d="M 254.2 82.9 C 255.8 82.2 257.6 82.2 259.1 83 C 275.9 91.3 300.3 108.7 319.8 134.2 C 339.4 159.7 354.2 193.6 351 234.7 C 348.1 272.2 361.5 296 379.1 310.8 C 396.9 325.9 419.4 332 434.6 332.9 C 437.1 333.1 439.2 334.9 439.7 337.4 C 440.2 340 438.9 342.5 436.6 343.6 C 416.1 353.2 383.8 361.9 354 356 C 339 353 324.5 346.2 312.6 334 C 300.7 321.7 291.7 304.3 287.1 280.4 C 286.1 275.1 285.1 271.1 284 268.1 C 283.2 265.9 282.5 264.6 282 263.8 C 281.7 264 281.4 264.3 281.1 264.8 C 278.5 268 275.5 274.3 272.1 283.5 C 268.7 292.6 265.2 304 261.7 317.1 C 247.4 369.6 232.3 447.6 221.1 505.9 C 220.7 507.8 220.4 509.7 220 511.6 C 216.3 557.5 169.7 592.2 115 592.2 C 58.1 592.2 9.8 554.5 9.8 505.7 C 9.8 457 58.1 419.3 115 419.3 C 136.6 419.3 156.8 424.7 173.5 433.9 L 251.2 86.8 C 251.5 85.1 252.7 83.7 254.2 82.9 Z"
           fill="url(#fillGradient)" stroke="var(--glow-color)" stroke-width="8" />
       </svg>
     </div>
-    <div class="beats-info">Beats: <span id="beatCounter">0</span></div>
+    <div class="stats-container">
+        <div class="stat">Beats: <span id="beatCounter" class="stat-value">0</span></div>
+        <div class="stat">Tiempo: <span id="timer" class="stat-value">0.0s</span></div>
+    </div>
   </div>
 
-  <footer class="footer">SAP Beats Challenge</footer>
+  <footer class="footer">SAP Speed Challenge</footer>
 
   <audio id="sound-guitar" loop src="https://cdn.pixabay.com/audio/2022/01/18/audio_76580cb462.mp3" preload="auto"></audio>
 
@@ -132,7 +140,7 @@
         fillStop1: document.getElementById('fillStop1'),
         fillStop2: document.getElementById('fillStop2'),
         timerDisplay: document.getElementById('timer'),
-        finalBeatsDisplay: document.getElementById('final-beats'),
+        finalTimeDisplay: document.getElementById('final-time'),
         canvas: document.getElementById('confetti-canvas'),
     };
 
@@ -142,12 +150,18 @@
 
     const GameState = {
         beats: 0,
-        targetBeatsForFill: 250,
+        targetBeats: 600,
         isGameActive: false,
-        timeLeft: 10,
+        startTime: 0,
         timerInterval: null,
         confettiLauncher: confetti.create(DOMElements.canvas, { resize: true, useWorker: true }),
     };
+
+    function vibrate(pattern) {
+        if (navigator.vibrate) {
+            navigator.vibrate(pattern);
+        }
+    }
 
     function handleMotion(event) {
         if (!GameState.isGameActive) return;
@@ -159,12 +173,17 @@
             GameState.beats++;
             DOMElements.beatCounter.innerText = GameState.beats;
 
-            const fillPercentage = Math.min((GameState.beats / GameState.targetBeatsForFill) * 100, 100);
+            const fillPercentage = Math.min((GameState.beats / GameState.targetBeats) * 100, 100);
             DOMElements.fillStop1.setAttribute('offset', `${fillPercentage}%`);
             DOMElements.fillStop2.setAttribute('offset', `${fillPercentage}%`);
 
             if (Sounds.guitar.paused) {
                 Sounds.guitar.play().catch(e => {});
+            }
+            vibrate(50); // Vibración corta con cada beat
+
+            if (GameState.beats >= GameState.targetBeats) {
+                endGame();
             }
         }
     }
@@ -174,15 +193,18 @@
         clearInterval(GameState.timerInterval);
         window.removeEventListener('devicemotion', handleMotion);
         Sounds.guitar.pause();
+        
+        const finalTime = ((Date.now() - GameState.startTime) / 1000).toFixed(2);
+        DOMElements.finalTimeDisplay.innerText = `${finalTime}s`;
 
         DOMElements.fillStop1.style.transition = 'offset 0.5s ease-in-out';
         DOMElements.fillStop2.style.transition = 'offset 0.5s ease-in-out';
         DOMElements.fillStop1.setAttribute('offset', '100%');
         DOMElements.fillStop2.setAttribute('offset', '100%');
 
-        DOMElements.finalBeatsDisplay.innerText = `${GameState.beats} Beats!`;
         DOMElements.overlayResults.classList.remove('hidden');
         launchConfetti();
+        vibrate([200, 100, 200]); // Vibración de victoria
 
         setTimeout(() => {
             window.location.href = 'https://forms.gle/VvtAHk7RNg5DyYM3A';
@@ -193,17 +215,17 @@
         const duration = 3 * 1000;
         const animationEnd = Date.now() + duration;
         const colors = ['#0077C6', '#ADD8E6', '#FFFFFF'];
-
         function frame() {
-            GameState.confettiLauncher({
-                particleCount: 3, angle: 60, spread: 55, origin: { x: 0 }, colors: colors
-            });
-            GameState.confettiLauncher({
-                particleCount: 3, angle: 120, spread: 55, origin: { x: 1 }, colors: colors
-            });
+            GameState.confettiLauncher({ particleCount: 3, angle: 60, spread: 55, origin: { x: 0 }, colors: colors });
+            GameState.confettiLauncher({ particleCount: 3, angle: 120, spread: 55, origin: { x: 1 }, colors: colors });
             if (Date.now() < animationEnd) requestAnimationFrame(frame);
         }
         frame();
+    }
+    
+    function updateTimer() {
+        const elapsedTime = ((Date.now() - GameState.startTime) / 1000).toFixed(1);
+        DOMElements.timerDisplay.innerText = `${elapsedTime}s`;
     }
 
     async function initializeGame() {
@@ -220,7 +242,7 @@
                 const permissionState = await DeviceMotionEvent.requestPermission();
                 if (permissionState === 'granted') {
                     window.addEventListener('devicemotion', handleMotion);
-                    startGameTimer();
+                    startGame();
                 } else {
                     alert('Para jugar, necesitas permitir el acceso al sensor de movimiento.');
                     DOMElements.overlayStart.classList.remove('hidden');
@@ -231,22 +253,14 @@
             }
         } else {
             window.addEventListener('devicemotion', handleMotion);
-            startGameTimer();
+            startGame();
         }
     }
     
-    function startGameTimer() {
+    function startGame() {
         GameState.isGameActive = true;
-        GameState.timeLeft = 10;
-        DOMElements.timerDisplay.innerText = GameState.timeLeft;
-
-        GameState.timerInterval = setInterval(() => {
-            GameState.timeLeft--;
-            DOMElements.timerDisplay.innerText = GameState.timeLeft > 0 ? GameState.timeLeft : "¡Ya!";
-            if (GameState.timeLeft <= 0) {
-                endGame();
-            }
-        }, 1000);
+        GameState.startTime = Date.now();
+        GameState.timerInterval = setInterval(updateTimer, 100);
     }
 
     DOMElements.startButton.addEventListener('click', initializeGame);
