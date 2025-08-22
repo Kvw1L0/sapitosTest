@@ -10,7 +10,6 @@
       --sap-light-blue: #ADD8E6;
       --dark-background: #1E1E1E;
       --glow-color: var(--sap-light-blue);
-      --score-color: #FFFFFF;
     }
 
     body {
@@ -51,7 +50,7 @@
     }
     #startButton:active { transform: scale(0.95); }
 
-    #overlay-results h2 { font-size: 3em; color: var(--score-color); text-shadow: 0 0 10px var(--glow-color); margin-bottom: 15px; }
+    #overlay-results h2 { font-size: 3em; text-shadow: 0 0 10px var(--glow-color); margin-bottom: 15px; }
     #overlay-results p { font-size: 1.5em; opacity: 0.8; }
 
     /* --- Contenido Principal --- */
@@ -59,13 +58,13 @@
     .logo { max-width: 160px; opacity: 0.9; margin-top: 10px; }
     .game-area { display: flex; flex-direction: column; align-items: center; justify-content: center; flex-grow: 1; }
     .music-note-container {
-      width: 150px;
-      filter: drop-shadow(0 0 5px var(--glow-color)) drop-shadow(0 0 15px var(--glow-color));
+      width: 180px;
+      filter: drop-shadow(0 0 8px var(--glow-color));
       animation: breathing 4s ease-in-out infinite alternate;
     }
     @keyframes breathing {
       from { transform: scale(1); }
-      to { transform: scale(1.04); }
+      to { transform: scale(1.03); }
     }
     .beats-info { font-size: 1.5em; margin-top: 20px; text-shadow: 0 0 5px var(--glow-color); }
     .timer { font-size: 2.5em; font-weight: bold; color: var(--sap-blue); text-shadow: 0 0 10px var(--sap-blue); margin: 10px 0; height: 40px;}
@@ -103,7 +102,7 @@
   <div class="game-area">
     <div class="timer" id="timer">10</div>
     <div class="music-note-container">
-      <svg id="elegantQuaver" viewBox="0 0 150 250" xmlns="http://www.w3.org/2000/svg">
+      <svg id="userQuaver" viewBox="0 0 450 675" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <linearGradient id="fillGradient" x1="0%" y1="100%" x2="0%" y2="0%">
             <stop id="fillStop1" offset="0%" stop-color="var(--sap-blue)" />
@@ -111,8 +110,8 @@
           </linearGradient>
         </defs>
         <path
-          d="M120.4,14.6c-13.3,9.1-22.3,32.2-18.3,50.3l1,0.6V200.6c0,9.9-5.6,18.6-14.9,18.6s-14.9-8.7-14.9-27.2c0-18.7,5.6-28.4,14.9-28.4c3.1,0,6.1,0.5,9.1,1.6V12.5C97.1-0.2,95.7-25.1,116.6-38.3c3.3-2,7.1-2.9,11-2.9c2.8,0,5.5,0.7,7.7,2"
-          fill="url(#fillGradient)" stroke="var(--glow-color)" stroke-width="3" />
+          d="M 254.207031 82.925781 C 255.757812 82.183594 257.5625 82.199219 259.101562 82.964844 C 275.875 91.296875 300.304688 108.71875 319.824219 134.195312 C 339.398438 159.746094 354.203125 193.648438 350.992188 234.667969 C 348.054688 272.214844 361.496094 296.023438 379.054688 310.835938 C 396.886719 325.878906 419.390625 331.972656 434.5625 332.910156 C 437.113281 333.066406 439.234375 334.9375 439.714844 337.449219 C 440.191406 339.964844 438.90625 342.480469 436.589844 343.566406 C 416.050781 353.183594 383.800781 361.875 353.996094 355.953125 C 338.964844 352.96875 324.46875 346.242188 312.566406 333.980469 C 300.671875 321.726562 291.695312 304.285156 287.128906 280.417969 C 286.113281 275.113281 285.050781 271.0625 283.984375 268.101562 C 283.199219 265.917969 282.492188 264.558594 281.960938 263.761719 C 281.722656 264.007812 281.425781 264.335938 281.078125 264.777344 C 278.542969 267.996094 275.476562 274.253906 272.066406 283.492188 C 268.71875 292.5625 265.222656 303.980469 261.65625 317.085938 C 247.371094 369.578125 232.347656 447.574219 221.121094 505.886719 C 220.746094 507.824219 220.378906 509.742188 220.011719 511.636719 C 216.257812 557.539062 169.710938 592.164062 115.019531 592.164062 C 58.054688 592.164062 9.785156 554.511719 9.785156 505.742188 C 9.785156 456.972656 58.054688 419.320312 115.019531 419.320312 C 136.609375 419.320312 156.75 424.652344 173.523438 433.871094 L 251.15625 86.753906 C 251.53125 85.078125 252.65625 83.664062 254.207031 82.925781 Z"
+          fill="url(#fillGradient)" stroke="var(--glow-color)" stroke-width="8" />
       </svg>
     </div>
     <div class="beats-info">Beats: <span id="beatCounter">0</span></div>
@@ -143,6 +142,7 @@
 
     const GameState = {
         beats: 0,
+        targetBeatsForFill: 250,
         isGameActive: false,
         timeLeft: 10,
         timerInterval: null,
@@ -158,8 +158,13 @@
         if (shakePower > 30) {
             GameState.beats++;
             DOMElements.beatCounter.innerText = GameState.beats;
+
+            const fillPercentage = Math.min((GameState.beats / GameState.targetBeatsForFill) * 100, 100);
+            DOMElements.fillStop1.setAttribute('offset', `${fillPercentage}%`);
+            DOMElements.fillStop2.setAttribute('offset', `${fillPercentage}%`);
+
             if (Sounds.guitar.paused) {
-                Sounds.guitar.play().catch(e => console.error("Audio playback failed:", e));
+                Sounds.guitar.play().catch(e => {});
             }
         }
     }
@@ -170,7 +175,6 @@
         window.removeEventListener('devicemotion', handleMotion);
         Sounds.guitar.pause();
 
-        // Animar el llenado de la corchea
         DOMElements.fillStop1.style.transition = 'offset 0.5s ease-in-out';
         DOMElements.fillStop2.style.transition = 'offset 0.5s ease-in-out';
         DOMElements.fillStop1.setAttribute('offset', '100%');
@@ -192,35 +196,25 @@
 
         function frame() {
             GameState.confettiLauncher({
-                particleCount: 3,
-                angle: 60, spread: 55, origin: { x: 0 }, colors: colors
+                particleCount: 3, angle: 60, spread: 55, origin: { x: 0 }, colors: colors
             });
             GameState.confettiLauncher({
-                particleCount: 3,
-                angle: 120, spread: 55, origin: { x: 1 }, colors: colors
+                particleCount: 3, angle: 120, spread: 55, origin: { x: 1 }, colors: colors
             });
-
-            if (Date.now() < animationEnd) {
-                requestAnimationFrame(frame);
-            }
+            if (Date.now() < animationEnd) requestAnimationFrame(frame);
         }
         frame();
     }
 
     async function initializeGame() {
-        // 1. Ocultar el overlay de inicio
         DOMElements.overlayStart.classList.add('hidden');
 
-        // 2. Desbloquear el audio (esencial para iOS)
         try {
             await Sounds.guitar.play();
             Sounds.guitar.pause();
             Sounds.guitar.currentTime = 0;
-        } catch (e) {
-            console.warn("Audio context could not be resumed automatically.");
-        }
+        } catch (e) {}
 
-        // 3. Solicitar permisos de movimiento (esencial para iOS 13+)
         if (typeof DeviceMotionEvent.requestPermission === 'function') {
             try {
                 const permissionState = await DeviceMotionEvent.requestPermission();
@@ -229,13 +223,13 @@
                     startGameTimer();
                 } else {
                     alert('Para jugar, necesitas permitir el acceso al sensor de movimiento.');
+                    DOMElements.overlayStart.classList.remove('hidden');
                 }
             } catch (error) {
-                console.error('Permission request failed:', error);
-                alert('Hubo un error al solicitar los permisos de movimiento.');
+                alert('Hubo un error al solicitar los permisos.');
+                DOMElements.overlayStart.classList.remove('hidden');
             }
         } else {
-            // Para Android y otros dispositivos que no requieren permiso explícito
             window.addEventListener('devicemotion', handleMotion);
             startGameTimer();
         }
@@ -248,7 +242,7 @@
 
         GameState.timerInterval = setInterval(() => {
             GameState.timeLeft--;
-            DOMElements.timerDisplay.innerText = GameState.timeLeft;
+            DOMElements.timerDisplay.innerText = GameState.timeLeft > 0 ? GameState.timeLeft : "¡Ya!";
             if (GameState.timeLeft <= 0) {
                 endGame();
             }
