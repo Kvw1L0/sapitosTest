@@ -1,281 +1,261 @@
 <!DOCTYPE html>
-
 <html lang="es">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-<title>SAP Beats Challenge</title>
-<style>
-:root {
---sap-blue: #0077C6; /* Azul principal de SAP /
---sap-light-blue: #ADD8E6; / Azul claro de SAP */
---dark-background: #1E1E1E;
---glow-color: var(--sap-light-blue);
---score-color: #FFFFFF;
-}
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>SAP Beats Challenge</title>
+  <style>
+    :root {
+      --sap-blue: #0077C6;
+      --sap-light-blue: #ADD8E6;
+      --dark-background: #1E1E1E;
+      --glow-color: var(--sap-light-blue);
+      --score-color: #FFFFFF;
+    }
 
-body {
-  margin: 0;
-  font-family: 'Segoe UI', sans-serif;
-  background-color: var(--dark-background);
-  color: white;
-  text-align: center;
-  padding: 20px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-around;
-  min-height: 100vh;
-  box-sizing: border-box;
-}
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--dark-background);
+      color: white;
+      text-align: center;
+      padding: 20px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      height: 100vh;
+      box-sizing: border-box;
+    }
 
-/* --- Overlay de Inicio --- */
-#overlay-start {
-  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(30, 30, 30, 0.9); backdrop-filter: blur(8px);
-  z-index: 10000; display: flex; flex-direction: column;
-  justify-content: center; align-items: center; padding: 25px;
-  box-sizing: border-box; transition: opacity 0.5s ease-out;
-}
-#overlay-start.hidden { opacity: 0; pointer-events: none; }
-.overlay-content { max-width: 400px; }
-.overlay-content h2 { font-size: 28px; color: var(--sap-blue); text-shadow: 0 0 8px var(--sap-blue); }
-.overlay-content p { font-size: 18px; line-height: 1.6; }
-#startButton {
-  margin-top: 25px; padding: 15px 30px; font-size: 20px; font-weight: bold;
-  color: var(--dark-background); background-color: var(--sap-blue);
-  border: none; border-radius: 10px; cursor: pointer;
-  box-shadow: 0 0 15px var(--sap-blue), 0 0 25px var(--sap-blue);
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-#startButton:hover { transform: scale(1.05); }
+    /* --- Overlays --- */
+    .overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(30, 30, 30, 0.9); backdrop-filter: blur(8px);
+      z-index: 10000; display: flex; flex-direction: column;
+      justify-content: center; align-items: center; padding: 25px;
+      box-sizing: border-box; transition: opacity 0.5s ease-out;
+      opacity: 1; pointer-events: auto;
+    }
+    .overlay.hidden { opacity: 0; pointer-events: none; }
+    .overlay-content { max-width: 400px; }
+    .overlay-content h2 { font-size: 28px; color: var(--sap-blue); text-shadow: 0 0 8px var(--sap-blue); }
+    .overlay-content p { font-size: 18px; line-height: 1.6; }
+    #startButton {
+      margin-top: 25px; padding: 15px 30px; font-size: 20px; font-weight: bold;
+      color: white; background-color: var(--sap-blue);
+      border: none; border-radius: 10px; cursor: pointer;
+      box-shadow: 0 0 15px var(--sap-blue);
+      transition: transform 0.2s;
+    }
+    #startButton:active { transform: scale(0.95); }
 
-/* --- Overlay de Resultados --- */
-#overlay-results {
-  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(30, 30, 30, 0.95); backdrop-filter: blur(10px);
-  z-index: 10001; display: flex; flex-direction: column;
-  justify-content: center; align-items: center; padding: 25px;
-  box-sizing: border-box; opacity: 0; pointer-events: none;
-  transition: opacity 0.5s ease-in-out;
-}
-#overlay-results.visible { opacity: 1; pointer-events: auto; }
-.results-content {
-  text-align: center;
-}
-.results-content h2 {
-  font-size: 3em; color: var(--score-color);
-  text-shadow: 0 0 10px var(--glow-color);
-  margin-bottom: 15px;
-}
-.results-content p {
-  font-size: 1.5em; opacity: 0.8;
-}
+    #overlay-results h2 { font-size: 3em; color: var(--score-color); text-shadow: 0 0 10px var(--glow-color); margin-bottom: 15px; }
+    #overlay-results p { font-size: 1.5em; opacity: 0.8; }
 
-/* --- Contenido Principal --- */
-.app-header { margin-bottom: 20px; }
-.logo { max-width: 180px; opacity: 0.9; }
+    /* --- Contenido Principal --- */
+    .app-header { width: 100%; }
+    .logo { max-width: 160px; opacity: 0.9; margin-top: 10px; }
+    .game-area { display: flex; flex-direction: column; align-items: center; justify-content: center; flex-grow: 1; }
+    .music-note-container {
+      width: 150px;
+      filter: drop-shadow(0 0 5px var(--glow-color)) drop-shadow(0 0 15px var(--glow-color));
+      animation: breathing 4s ease-in-out infinite alternate;
+    }
+    @keyframes breathing {
+      from { transform: scale(1); }
+      to { transform: scale(1.04); }
+    }
+    .beats-info { font-size: 1.5em; margin-top: 20px; text-shadow: 0 0 5px var(--glow-color); }
+    .timer { font-size: 2.5em; font-weight: bold; color: var(--sap-blue); text-shadow: 0 0 10px var(--sap-blue); margin: 10px 0; height: 40px;}
+    .footer { width: 100%; font-size: 12px; opacity: 0.4; padding-bottom: 10px; }
 
-.music-note-container {
-  width: 80%; max-width: 150px;
-  filter: drop-shadow(0 0 5px var(--glow-color)) drop-shadow(0 0 15px var(--glow-color));
-  animation: breathing 4s ease-in-out infinite;
-}
-
-@keyframes breathing {
-  0%, 100% { filter: drop-shadow(0 0 5px var(--glow-color)) drop-shadow(0 0 15px var(--glow-color)); transform: scale(1); }
-  50% { filter: drop-shadow(0 0 10px var(--glow-color)) drop-shadow(0 0 25px var(--glow-color)); transform: scale(1.03); }
-}
-
-.beats-info { font-size: 1.5em; margin-top: 15px; text-shadow: 0 0 5px var(--glow-color); }
-.timer { font-size: 2.5em; font-weight: bold; color: var(--sap-blue); text-shadow: 0 0 10px var(--sap-blue); margin-top: 10px; }
-.hint { font-size: 16px; margin-top: 10px; opacity: 0.7; }
-.footer { position: absolute; bottom: 10px; font-size: 12px; opacity: 0.4; }
-
-#confetti-canvas {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    pointer-events: none; z-index: 9999;
-}
-</style>
+    #confetti-canvas {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none; z-index: 10001;
+    }
+  </style>
 </head>
 <body>
 
-<div id="overlay-start">
-<div class="overlay-content">
-<h2>¡Desafío SAP Beats! 🥁</h2>
-<p>¡Agita tu celular lo más rápido que puedas durante <span style="color: var(--sap-blue); font-weight: bold;">10 segundos</span> para generar la mayor cantidad de beats y encender la nota musical!</p>
-<p>Al finalizar, verás tu puntuación y podrás acceder al sorteo de increíbles premios.</p>
-<button id="startButton">¡A rockear!</button>
-</div>
-</div>
+  <div id="overlay-start" class="overlay">
+    <div class="overlay-content">
+      <h2>¡Desafío SAP Beats! 🥁</h2>
+      <p>Agita tu celular lo más rápido que puedas durante <strong>10 segundos</strong> para generar la mayor cantidad de beats. ¡Al finalizar, verás tu puntuación y podrás acceder al sorteo!</p>
+      <button id="startButton">¡A rockear!</button>
+    </div>
+  </div>
 
-<div id="overlay-results">
-<div class="results-content">
-<h2 id="final-beats"></h2>
-<p>¡Prepárate para el sorteo!</p>
-</div>
-</div>
+  <div id="overlay-results" class="overlay hidden">
+    <div class="overlay-content">
+      <h2 id="final-beats"></h2>
+      <p>¡Preparando el sorteo!</p>
+    </div>
+  </div>
 
-<canvas id="confetti-canvas"></canvas>
+  <canvas id="confetti-canvas"></canvas>
 
-<header class="app-header">
-<img class="logo" src="https://www.sap.com/dam/application/shared/logos/sap-logo.svg" alt="SAP Logo" />
-</header>
+  <header class="app-header">
+    <img class="logo" src="https://www.sap.com/dam/application/shared/logos/sap-logo.svg" alt="SAP Logo" />
+  </header>
 
-<p class="hint">¡Prepárate para agitar!</p>
-<div class="timer" id="timer"></div>
-<div class="beats-info">Beats Generados: <span id="beatCounter">0</span></div>
+  <div class="game-area">
+    <div class="timer" id="timer">10</div>
+    <div class="music-note-container">
+      <svg id="elegantQuaver" viewBox="0 0 150 250" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="fillGradient" x1="0%" y1="100%" x2="0%" y2="0%">
+            <stop id="fillStop1" offset="0%" stop-color="var(--sap-blue)" />
+            <stop id="fillStop2" offset="0%" stop-color="rgba(30, 30, 30, 0.2)" />
+          </linearGradient>
+        </defs>
+        <path
+          d="M120.4,14.6c-13.3,9.1-22.3,32.2-18.3,50.3l1,0.6V200.6c0,9.9-5.6,18.6-14.9,18.6s-14.9-8.7-14.9-27.2c0-18.7,5.6-28.4,14.9-28.4c3.1,0,6.1,0.5,9.1,1.6V12.5C97.1-0.2,95.7-25.1,116.6-38.3c3.3-2,7.1-2.9,11-2.9c2.8,0,5.5,0.7,7.7,2"
+          fill="url(#fillGradient)" stroke="var(--glow-color)" stroke-width="3" />
+      </svg>
+    </div>
+    <div class="beats-info">Beats: <span id="beatCounter">0</span></div>
+  </div>
 
-<div class="music-note-container">
-<svg id="elegantQuaver" viewBox="0 0 150 250" xmlns="http://www.w3.org/2000/svg">
-<defs>
-<linearGradient id="fillGradient" x1="0%" y1="100%" x2="0%" y2="0%">
-<stop id="fillStop1" offset="100%" stop-color="var(--sap-blue)" />
-<stop id="fillStop2" offset="100%" stop-color="rgba(30, 30, 30, 0.2)" />
-</linearGradient>
-<filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%" filterUnits="objectBoundingBox">
-<feGaussianBlur stdDeviation="3" in="SourceAlpha" result="blur" />
-<feComponentTransfer in="blur" result="glow">
-<feFuncA type="linear" slope="2" intercept="0"/>
-</feComponentTransfer>
-<feMerge>
-<feMergeNode in="glow" />
-<feMergeNode in="SourceGraphic" />
-</feMerge>
-</filter>
-</defs>
-<path
-d="M 88.1 13.4c-14.5 9.9-24.3 35-19.9 54.8l1.1 0.7v135.1c0 10.8-6.1 20.3-16.2 20.3-13.5 0-24.4-9.3-24.4-29.7 0-20.4 10.9-30.9 24.4-30.9 3.4 0 6.7 0.5 9.9 1.8V15.6c-11.6-13.6-9.9-39.5 12.4-53.1 3.6-2.1 7.7-3.2 12-3.2 3.1 0 6 0.8 8.4 2.2z"
-fill="url(#fillGradient)" stroke="var(--glow-color)" stroke-width="4" filter="url(#neonGlow)" />
-</svg>
-</div>
+  <footer class="footer">SAP Beats Challenge</footer>
 
-<div class="footer">SAP Beats Challenge</div>
+  <audio id="sound-guitar" loop src="https://cdn.pixabay.com/audio/2022/01/18/audio_76580cb462.mp3" preload="auto"></audio>
 
-<audio id="sound-guitar" src="https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3" preload="auto"></audio>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <script>
+    const DOMElements = {
+        overlayStart: document.getElementById('overlay-start'),
+        overlayResults: document.getElementById('overlay-results'),
+        startButton: document.getElementById('startButton'),
+        beatCounter: document.getElementById('beatCounter'),
+        fillStop1: document.getElementById('fillStop1'),
+        fillStop2: document.getElementById('fillStop2'),
+        timerDisplay: document.getElementById('timer'),
+        finalBeatsDisplay: document.getElementById('final-beats'),
+        canvas: document.getElementById('confetti-canvas'),
+    };
 
-<script>
-const DOMElements = {
-overlayStart: document.getElementById('overlay-start'),
-overlayResults: document.getElementById('overlay-results'),
-startButton: document.getElementById('startButton'),
-beatCounter: document.getElementById('beatCounter'),
-fillStop1: document.getElementById('fillStop1'),
-fillStop2: document.getElementById('fillStop2'),
-timerDisplay: document.getElementById('timer'),
-finalBeatsDisplay: document.getElementById('final-beats'),
-notePath: document.querySelector('.music-note-container svg path'),
-};
+    const Sounds = {
+        guitar: document.getElementById('sound-guitar'),
+    };
 
-const Sounds = {
-    guitar: document.getElementById(&#39;sound-guitar&#39;),
-};
-Sounds.guitar.loop = true;
+    const GameState = {
+        beats: 0,
+        isGameActive: false,
+        timeLeft: 10,
+        timerInterval: null,
+        confettiLauncher: confetti.create(DOMElements.canvas, { resize: true, useWorker: true }),
+    };
 
-const GameState = {
-    beats: 0,
-    maxBeats: 1000, // Cantidad visual para el llenado
-    isGameActive: false,
-    startTime: 0,
-    endTime: 0,
-    timeLeft: 10,
-    shakeInterval: null,
-    confettiLauncher: confetti.create(document.getElementById(&#39;confetti-canvas&#39;), { resize: true }),
-};
+    function handleMotion(event) {
+        if (!GameState.isGameActive) return;
 
-function startGame() {
-    DOMElements.overlayStart.classList.add(&#39;hidden&#39;);
-    GameState.beats = 0;
-    DOMElements.beatCounter.innerText = 0;
-    GameState.isGameActive = true;
-    GameState.startTime = Date.now();
-    GameState.timeLeft = 10;
-    DOMElements.timerDisplay.innerText = GameState.timeLeft;
-    Sounds.guitar.play().catch(() =&gt; {});
+        const acc = event.accelerationIncludingGravity;
+        const shakePower = Math.abs(acc.x) + Math.abs(acc.y) + Math.abs(acc.z);
 
-    GameState.shakeInterval = setInterval(() =&gt; {
-        if (GameState.timeLeft &lt;= 0) {
-            endGame();
-            return;
+        if (shakePower > 30) {
+            GameState.beats++;
+            DOMElements.beatCounter.innerText = GameState.beats;
+            if (Sounds.guitar.paused) {
+                Sounds.guitar.play().catch(e => console.error("Audio playback failed:", e));
+            }
         }
-        GameState.timeLeft--;
-        DOMElements.timerDisplay.innerText = GameState.timeLeft;
-    }, 1000);
-}
-
-function handleMotion(event) {
-    if (!GameState.isGameActive) return;
-    const acc = event.accelerationIncludingGravity;
-    const shakePower = Math.abs(acc.x) + Math.abs(acc.y) + Math.abs(acc.z);
-
-    if (shakePower &gt; 30) {
-        GameState.beats++;
-        DOMElements.beatCounter.innerText = GameState.beats;
-        // Puedes añadir aquí una lógica para un feedback visual más inmediato si lo deseas
     }
-    if (Math.abs(acc.x) &lt; 2 &amp;&amp; Math.abs(acc.y) &lt; 2 &amp;&amp; Math.abs(acc.z) &lt; 2) {
+
+    function endGame() {
+        GameState.isGameActive = false;
+        clearInterval(GameState.timerInterval);
+        window.removeEventListener('devicemotion', handleMotion);
         Sounds.guitar.pause();
-    } else if (Sounds.guitar.paused) {
-        Sounds.guitar.play().catch(() =&gt; {});
+
+        // Animar el llenado de la corchea
+        DOMElements.fillStop1.style.transition = 'offset 0.5s ease-in-out';
+        DOMElements.fillStop2.style.transition = 'offset 0.5s ease-in-out';
+        DOMElements.fillStop1.setAttribute('offset', '100%');
+        DOMElements.fillStop2.setAttribute('offset', '100%');
+
+        DOMElements.finalBeatsDisplay.innerText = `${GameState.beats} Beats!`;
+        DOMElements.overlayResults.classList.remove('hidden');
+        launchConfetti();
+
+        setTimeout(() => {
+            window.location.href = 'https://forms.gle/VvtAHk7RNg5DyYM3A';
+        }, 4000);
     }
-}
 
-function endGame() {
-    GameState.isGameActive = false;
-    clearInterval(GameState.shakeInterval);
-    Sounds.guitar.pause();
+    function launchConfetti() {
+        const duration = 3 * 1000;
+        const animationEnd = Date.now() + duration;
+        const colors = ['#0077C6', '#ADD8E6', '#FFFFFF'];
 
-    // Llenar la corchea visualmente
-    let fillPercent = 100;
-    DOMElements.fillStop1.setAttribute(&#39;offset&#39;, fillPercent + &#39;%&#39;);
-    DOMElements.fillStop2.setAttribute(&#39;offset&#39;, fillPercent + &#39;%&#39;);
+        function frame() {
+            GameState.confettiLauncher({
+                particleCount: 3,
+                angle: 60, spread: 55, origin: { x: 0 }, colors: colors
+            });
+            GameState.confettiLauncher({
+                particleCount: 3,
+                angle: 120, spread: 55, origin: { x: 1 }, colors: colors
+            });
 
-    DOMElements.finalBeatsDisplay.innerText = `${GameState.beats} Beats!`;
-    DOMElements.overlayResults.classList.add(&#39;visible&#39;);
-    launchConfetti();
+            if (Date.now() < animationEnd) {
+                requestAnimationFrame(frame);
+            }
+        }
+        frame();
+    }
 
-    setTimeout(() =&gt; {
-        window.location.href = &#39;[https://forms.gle/VvtAHk7RNg5DyYM3A](https://forms.gle/VvtAHk7RNg5DyYM3A)&#39;;
-    }, 3000);
-}
+    async function initializeGame() {
+        // 1. Ocultar el overlay de inicio
+        DOMElements.overlayStart.classList.add('hidden');
 
-function launchConfetti() {
-    const end = Date.now() + (3 * 1000);
-    const colors = [&#39;#0077C6&#39;, &#39;#ADD8E6&#39;, &#39;#FFFFFF&#39;];
+        // 2. Desbloquear el audio (esencial para iOS)
+        try {
+            await Sounds.guitar.play();
+            Sounds.guitar.pause();
+            Sounds.guitar.currentTime = 0;
+        } catch (e) {
+            console.warn("Audio context could not be resumed automatically.");
+        }
 
-    (function frame() {
-      confetti({
-        particleCount: 200,
-        angle: 60,
-        spread: 55,
-        origin: { x: 0 },
-        colors: colors
-      });
-      confetti({
-        particleCount: 200,
-        angle: 120,
-        spread: 55,
-        origin: { x: 1 },
-        colors: colors
-      });
+        // 3. Solicitar permisos de movimiento (esencial para iOS 13+)
+        if (typeof DeviceMotionEvent.requestPermission === 'function') {
+            try {
+                const permissionState = await DeviceMotionEvent.requestPermission();
+                if (permissionState === 'granted') {
+                    window.addEventListener('devicemotion', handleMotion);
+                    startGameTimer();
+                } else {
+                    alert('Para jugar, necesitas permitir el acceso al sensor de movimiento.');
+                }
+            } catch (error) {
+                console.error('Permission request failed:', error);
+                alert('Hubo un error al solicitar los permisos de movimiento.');
+            }
+        } else {
+            // Para Android y otros dispositivos que no requieren permiso explícito
+            window.addEventListener('devicemotion', handleMotion);
+            startGameTimer();
+        }
+    }
+    
+    function startGameTimer() {
+        GameState.isGameActive = true;
+        GameState.timeLeft = 10;
+        DOMElements.timerDisplay.innerText = GameState.timeLeft;
 
-      if (Date.now() &lt; end) {
-        requestAnimationFrame(frame);
-      }
-    }());
-}
+        GameState.timerInterval = setInterval(() => {
+            GameState.timeLeft--;
+            DOMElements.timerDisplay.innerText = GameState.timeLeft;
+            if (GameState.timeLeft <= 0) {
+                endGame();
+            }
+        }, 1000);
+    }
 
-DOMElements.startButton.addEventListener(&#39;click&#39;, startGame);
-
-if (window.DeviceMotionEvent) {
-    window.addEventListener(&#39;devicemotion&#39;, handleMotion);
-} else {
-    alert(&#39;Tu dispositivo no soporta el sensor de movimiento.&#39;);
-}
-</script>
-
+    DOMElements.startButton.addEventListener('click', initializeGame);
+  </script>
 </body>
 </html>
