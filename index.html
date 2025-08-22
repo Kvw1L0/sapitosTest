@@ -1,301 +1,260 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-    <title>Rock Challenge</title>
-    <style>
-        :root {
-            --sap-blue: #00A1E0;
-            --neon-pink: #FF00FF;
-            --electric-blue: #03DAC6;
-            --dark-background: #1A1A2E;
-            --glow-color: #E0F7FA;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>Rock Challenge</title>
+  <style>
+    :root {
+      --sap-blue: #00A1E0;
+      --neon-pink: #FF00FF;
+      --electric-blue: #03DAC6; 
+      --dark-background: #1A1A2E;
+      --glow-color: #E0F7FA;
+      --vh: 1vh;
+    }
 
-        body {
-            margin: 0;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--dark-background);
-            background-image: radial-gradient(circle at 50% 50%, #4a2f8c 0%, #1a1a2e 70%);
-            color: white;
-            text-align: center;
-            padding: 20px;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            box-sizing: border-box;
-        }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--dark-background);
+      background-image: radial-gradient(circle at 50% 50%, #4a2f8c 0%, #1a1a2e 70%);
+      color: white;
+      text-align: center;
+      padding: 20px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: calc(var(--vh, 1vh) * 100);
+      box-sizing: border-box;
+    }
 
-        /* --- Overlays --- */
-        .overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(26, 26, 46, 0.95); backdrop-filter: blur(10px);
-            z-index: 10000; display: flex; flex-direction: column;
-            justify-content: center; align-items: center; padding: 25px;
-            box-sizing: border-box; transition: opacity 0.5s ease-out;
-            opacity: 1; pointer-events: auto;
-        }
-        .overlay.hidden { opacity: 0; pointer-events: none; }
-        .overlay-content { max-width: 450px; }
-        .overlay-content h2 { font-size: 28px; color: var(--sap-blue); text-shadow: none; }
-        .overlay-content p { font-size: 18px; line-height: 1.6; }
-        #startButton {
-            margin-top: 25px; padding: 15px 30px; font-size: 20px; font-weight: bold;
-            color: white; background-color: var(--sap-blue);
-            border: none; border-radius: 10px; cursor: pointer;
-            box-shadow: 0 0 15px var(--sap-blue);
-            transition: transform 0.2s;
-        }
-        #startButton:active { transform: scale(0.95); }
+    .overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(26, 26, 46, 0.95); backdrop-filter: blur(10px);
+      z-index: 10000; display: flex; flex-direction: column;
+      justify-content: center; align-items: center; padding: 25px;
+      box-sizing: border-box; transition: opacity 0.5s ease-out;
+      opacity: 1; pointer-events: auto;
+    }
+    .overlay.hidden { opacity: 0; pointer-events: none; }
+    .overlay-content { max-width: 450px; }
+    .overlay-content h2 { font-size: 28px; color: var(--sap-blue); text-shadow: none; }
+    .overlay-content p { font-size: 18px; line-height: 1.6; }
+    #startButton {
+      margin-top: 25px; padding: 15px 30px; font-size: 20px; font-weight: bold;
+      color: white; background-color: var(--sap-blue);
+      border: none; border-radius: 10px; cursor: pointer;
+      box-shadow: 0 0 15px var(--sap-blue);
+      transition: transform 0.2s;
+    }
+    #startButton:active { transform: scale(0.95); }
 
-        /* OVERLAY FINAL "WOW" ACTUALIZADO */
-        #overlay-results .results-wrapper {
-            transform: scale(0.8);
-            opacity: 0;
-            animation: result-appear 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-        }
-        @keyframes result-appear {
-            to { transform: scale(1); opacity: 1; }
-        }
-        #overlay-results .final-message {
-            font-size: 2.8em;
-            font-weight: 700;
-            margin-bottom: 10px;
-            color: var(--electric-blue);
-            text-shadow: 0 0 8px var(--electric-blue), 0 0 15px white;
-            -webkit-text-stroke: 2px white;
-            text-stroke: 2px white;
-            paint-order: stroke fill;
-        }
-        #overlay-results .final-time-value {
-            font-size: 6em;
-            font-weight: 900;
-            color: var(--neon-pink);
-            -webkit-text-stroke: 2px white;
-            text-stroke: 2px white;
-            paint-order: stroke fill;
-            text-shadow: 0 0 10px var(--neon-pink), 0 0 20px white, 0 0 30px var(--neon-pink);
-            margin: 0;
-        }
+    #overlay-results .results-wrapper {
+        transform: scale(0.8);
+        opacity: 0;
+        animation: result-appear 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    }
+    @keyframes result-appear {
+      to { transform: scale(1); opacity: 1; }
+    }
+    #overlay-results .final-message {
+        font-size: 2.8em;
+        font-weight: 700;
+        margin-bottom: 10px;
+        color: var(--electric-blue);
+        text-shadow: 0 0 8px var(--electric-blue), 0 0 15px white;
+        -webkit-text-stroke: 2px white;
+        text-stroke: 2px white;
+        paint-order: stroke fill;
+    }
+    #overlay-results .final-time-value {
+        font-size: 6em;
+        font-weight: 900;
+        color: var(--neon-pink);
+        -webkit-text-stroke: 2px white;
+        text-stroke: 2px white;
+        paint-order: stroke fill;
+        text-shadow: 0 0 10px var(--neon-pink), 0 0 20px white, 0 0 30px var(--neon-pink);
+        margin: 0;
+    }
 
-        /* --- Contenido Principal --- */
-        .game-area { 
-            display: none; /* Inicia oculto */
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            flex-grow: 1; 
-        }
-        .music-note-container {
-            width: 328px;
-            margin-bottom: 20px;
-            filter: drop-shadow(0 0 8px var(--glow-color));
-            animation: breathing 4s ease-in-out infinite alternate;
-        }
-        @keyframes breathing {
-            from { transform: scale(1); }
-            to { transform: scale(1.03); }
-        }
-        .footer { width: 100%; font-size: 12px; opacity: 0.4; padding: 10px 0; }
-        #confetti-canvas {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; z-index: 10001;
-        }
-    </style>
+    .game-area { display: flex; flex-direction: column; align-items: center; justify-content: center; flex-grow: 1; }
+    .music-note-container {
+      width: 328px;
+      margin-bottom: 20px;
+      filter: drop-shadow(0 0 8px var(--glow-color));
+      animation: breathing 4s ease-in-out infinite alternate;
+    }
+    @keyframes breathing {
+      from { transform: scale(1); }
+      to { transform: scale(1.03); }
+    }
+    .footer { width: 100%; font-size: 12px; opacity: 0.4; padding: 10px 0; }
+    #confetti-canvas {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none; z-index: 10001;
+    }
+  </style>
 </head>
 <body>
 
-    <div id="overlay-start" class="overlay">
-        <div class="overlay-content">
-            <h2>¡Rock Challenge! ⚡</h2>
-            <p>El desafío es simple: ¡llena de energía la nota musical agitando tu celular <strong>lo más rápido que puedas</strong>! Tu tiempo corre desde el primer momento. ¡Demuestra tu velocidad para entrar al sorteo!</p>
-            <button id="startButton">¡Comenzar!</button>
-        </div>
+  <div id="overlay-start" class="overlay">
+    <div class="overlay-content">
+      <h2>¡Rock Challenge! ⚡</h2>
+      <p>El desafío es simple: ¡llena de energía la nota musical agitando tu celular <strong>lo más rápido que puedas</strong>! Tu tiempo corre desde el primer momento. ¡Demuestra tu velocidad para entrar al sorteo!</p>
+      <button id="startButton">¡Comenzar!</button>
     </div>
+  </div>
 
-    <div id="overlay-results" class="overlay hidden">
-        <div class="results-wrapper">
-            <p class="final-message" id="final-message"></p>
-            <h2 class="final-time-value" id="final-time"></h2>
-        </div>
+  <div id="overlay-results" class="overlay hidden">
+    <div class="results-wrapper">
+      <p class="final-message" id="final-message"></p>
+      <h2 class="final-time-value" id="final-time"></h2>
     </div>
+  </div>
 
-    <canvas id="confetti-canvas"></canvas>
+  <canvas id="confetti-canvas"></canvas>
 
-    <div id="gameArea" class="game-area">
-        <div class="music-note-container">
-            <svg id="userQuaver" viewBox="0 0 450 675" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                    <linearGradient id="fillGradient" x1="0%" y1="100%" x2="0%" y2="0%">
-                        <stop id="fillStop1" offset="0%" stop-color="var(--sap-blue)" />
-                        <stop id="fillStop2" offset="0%" stop-color="rgba(30, 30, 30, 0.2)" />
-                    </linearGradient>
-                </defs>
-                <path
-                    d="M 254.2 82.9 C 255.8 82.2 257.6 82.2 259.1 83 C 275.9 91.3 300.3 108.7 319.8 134.2 C 339.4 159.7 354.2 193.6 351 234.7 C 348.1 272.2 361.5 296 379.1 310.8 C 396.9 325.9 419.4 332 434.6 332.9 C 437.1 333.1 439.2 334.9 439.7 337.4 C 440.2 340 438.9 342.5 436.6 343.6 C 416.1 353.2 383.8 361.9 354 356 C 339 353 324.5 346.2 312.6 334 C 300.7 321.7 291.7 304.3 287.1 280.4 C 286.1 275.1 285.1 271.1 284 268.1 C 283.2 265.9 282.5 264.6 282 263.8 C 281.7 264 281.4 264.3 281.1 264.8 C 278.5 268 275.5 274.3 272.1 283.5 C 268.7 292.6 265.2 304 261.7 317.1 C 247.4 369.6 232.3 447.6 221.1 505.9 C 220.7 507.8 220.4 509.7 220 511.6 C 216.3 557.5 169.7 592.2 115 592.2 C 58.1 592.2 9.8 554.5 9.8 505.7 C 9.8 457 58.1 419.3 115 419.3 C 136.6 419.3 156.8 424.7 173.5 433.9 L 251.2 86.8 C 251.5 85.1 252.7 83.7 254.2 82.9 Z"
-                    fill="url(#fillGradient)" stroke="var(--glow-color)" stroke-width="8" />
-            </svg>
-        </div>
+  <div class="game-area">
+    <div class="music-note-container">
+      <!-- SVG de la corchea -->
+      <svg id="userQuaver" viewBox="0 0 450 675" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="fillGradient" x1="0%" y1="100%" x2="0%" y2="0%">
+            <stop id="fillStop1" offset="0%" stop-color="var(--sap-blue)" />
+            <stop id="fillStop2" offset="0%" stop-color="rgba(30, 30, 30, 0.2)" />
+          </linearGradient>
+        </defs>
+        <path d="M 254.2 82.9 C 255.8 82.2 257.6 82.2 259.1 83 ..." fill="url(#fillGradient)" stroke="var(--glow-color)" stroke-width="8" />
+      </svg>
     </div>
+  </div>
 
-    <footer class="footer">Rock Challenge</footer>
+  <footer class="footer">Rock Challenge</footer>
 
-    <audio id="sound-guitar" loop src="data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjQ1LjEwMAAAAAAAAAAAAAAA//tQxAADBgwgAAAAAB9FbEd4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAElZpY3RvcmlhIEhlcm5hbmRlenp6egAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//uQxAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlMYXZmNTguNDUuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV.  
-  * **No se estaba mostrando la corchea**: La sección `div.game-area` tenía la propiedad `display: none` en el CSS, lo que la ocultaba. He cambiado el CSS para que el área del juego sea visible al inicio y he añadido una clase `hidden` al `div` de la pantalla de inicio para que sea esta la que se oculte al presionar el botón.
-    * **Código HTML de la corchea (ahora visible por defecto):**
-        ```html
-        <div id="gameArea" class="game-area">
-            <div class="music-note-container">
-                <svg id="userQuaver" viewBox="0 0 450 675" xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)">
-                    <defs>
-                        <linearGradient id="fillGradient" x1="0%" y1="100%" x2="0%" y2="0%">
-                            <stop id="fillStop1" offset="0%" stop-color="var(--sap-blue)" />
-                            <stop id="fillStop2" offset="0%" stop-color="rgba(30, 30, 30, 0.2)" />
-                        </linearGradient>
-                    </defs>
-                    <path
-                        d="M 254.2 82.9 C 255.8 82.2 257.6 82.2 259.1 83 C 275.9 91.3 300.3 108.7 319.8 134.2 C 339.4 159.7 354.2 193.6 351 234.7 C 348.1 272.2 361.5 296 379.1 310.8 C 396.9 325.9 419.4 332 434.6 332.9 C 437.1 333.1 439.2 334.9 439.7 337.4 C 440.2 340 438.9 342.5 436.6 343.6 C 416.1 353.2 383.8 361.9 354 356 C 339 353 324.5 346.2 312.6 334 C 300.7 321.7 291.7 304.3 287.1 280.4 C 286.1 275.1 285.1 271.1 284 268.1 C 283.2 265.9 282.5 264.6 282 263.8 C 281.7 264 281.4 264.3 281.1 264.8 C 278.5 268 275.5 274.3 272.1 283.5 C 268.7 292.6 265.2 304 261.7 317.1 C 247.4 369.6 232.3 447.6 221.1 505.9 C 220.7 507.8 220.4 509.7 220 511.6 C 216.3 557.5 169.7 592.2 115 592.2 C 58.1 592.2 9.8 554.5 9.8 505.7 C 9.8 457 58.1 419.3 115 419.3 C 136.6 419.3 156.8 424.7 173.5 433.9 L 251.2 86.8 C 251.5 85.1 252.7 83.7 254.2 82.9 Z"
-                        fill="url(#fillGradient)" stroke="var(--glow-color)" stroke-width="8" />
-                </svg>
-            </div>
-        </div>
-        <footer class="footer">Rock Challenge</footer>
-    </div>
+  <audio id="sound-guitar" loop src="data:audio/mp3;base64,SUQzBA..."></audio>
 
-    <audio id="sound-guitar" loop src="data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjQ1LjEwMAAAAAAAAAAAAAAA//tQxAADBgwgAAAAAB9FbEd4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAElZpY3RvcmlhIEhlcm5hbmRlenp6egAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//uQxAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlMYXZmNTguNDUuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
-    <script src="[https://cdn.jsdelivr.com/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js](https://cdn.jsdelivr.com/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js)"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
-    <script>
-        const DOMElements = {
-            overlayStart: document.getElementById('overlay-start'),
-            overlayResults: document.getElementById('overlay-results'),
-            startButton: document.getElementById('startButton'),
-            fillStop1: document.getElementById('fillStop1'),
-            fillStop2: document.getElementById('fillStop2'),
-            finalTimeDisplay: document.getElementById('final-time'),
-            finalMessageDisplay: document.getElementById('final-message'),
-            canvas: document.getElementById('confetti-canvas'),
-        };
+  <script>
+    const DOMElements = {
+        overlayStart: document.getElementById('overlay-start'),
+        overlayResults: document.getElementById('overlay-results'),
+        startButton: document.getElementById('startButton'),
+        fillStop1: document.getElementById('fillStop1'),
+        fillStop2: document.getElementById('fillStop2'),
+        finalTimeDisplay: document.getElementById('final-time'),
+        finalMessageDisplay: document.getElementById('final-message'),
+        canvas: document.getElementById('confetti-canvas'),
+    };
 
-        const Sounds = {
-            guitar: document.getElementById('sound-guitar'),
-        };
+    const Sounds = {
+        guitar: document.getElementById('sound-guitar'),
+    };
 
-        const GameState = {
-            beats: 0,
-            targetBeats: 600,
-            isGameActive: false,
-            startTime: 0,
-            confettiLauncher: confetti.create(DOMElements.canvas, { resize: true, useWorker: true }),
-        };
+    const GameState = {
+        beats: 0,
+        targetBeats: 600,
+        isGameActive: false,
+        startTime: 0,
+        confettiLauncher: confetti.create(DOMElements.canvas, { resize: true, useWorker: true }),
+    };
 
-        function vibrate(pattern) {
-            if (navigator.vibrate) {
-                navigator.vibrate(pattern);
-            }
+    function vibrate(pattern) {
+        if (navigator.vibrate) navigator.vibrate(pattern);
+    }
+
+    function handleMotion(event) {
+        if (!GameState.isGameActive) return;
+        const acc = event.accelerationIncludingGravity;
+        const shakePower = Math.abs(acc.x) + Math.abs(acc.y) + Math.abs(acc.z);
+        if (shakePower > 30) {
+            GameState.beats++;
+            const fillPercentage = Math.min((GameState.beats / GameState.targetBeats) * 100, 100);
+            DOMElements.fillStop1.setAttribute('offset', `${fillPercentage}%`);
+            DOMElements.fillStop2.setAttribute('offset', `${fillPercentage}%`);
+            if (Sounds.guitar.paused) Sounds.guitar.play().catch(() => {});
+            vibrate(50);
+            if (GameState.beats >= GameState.targetBeats) endGame();
         }
+    }
 
-        function handleMotion(event) {
-            if (!GameState.isGameActive) return;
+    function endGame() {
+        GameState.isGameActive = false;
+        window.removeEventListener('devicemotion', handleMotion);
+        Sounds.guitar.pause();
+        const finalTime = ((Date.now() - GameState.startTime) / 1000).toFixed(2);
+        DOMElements.finalMessageDisplay.innerText = `¡Rockeaste en`;
+        DOMElements.finalTimeDisplay.innerText = `${finalTime}s!`;
+        DOMElements.overlayResults.classList.remove('hidden');
+        launchConfetti();
+        vibrate([200, 100, 200]);
+        setTimeout(() => {
+            window.location.href = 'https://forms.gle/VvtAHk7RNg5DyYM3A';
+        }, 4000);
+    }
 
-            const acc = event.acceleration;
-            const shakePower = Math.abs(acc.x || 0) + Math.abs(acc.y || 0) + Math.abs(acc.z || 0);
+    function launchConfetti() {
+        const duration = 3000;
+        const animationEnd = Date.now() + duration;
+        const colors = ['#0077C6', '#ADD8E6', '#FFFFFF', '#FF00FF'];
+        (function frame() {
+            GameState.confettiLauncher({ particleCount: 3, angle: 60, spread: 55, origin: { x: 0 }, colors });
+            GameState.confettiLauncher({ particleCount: 3, angle: 120, spread: 55, origin: { x: 1 }, colors });
+            if (Date.now() < animationEnd) requestAnimationFrame(frame);
+        })();
+    }
 
-            if (shakePower > 20) {
-                GameState.beats++;
-
-                const fillPercentage = Math.min((GameState.beats / GameState.targetBeats) * 100, 100);
-                DOMElements.fillStop1.setAttribute('offset', `${fillPercentage}%`);
-                DOMElements.fillStop2.setAttribute('offset', `${fillPercentage}%`);
-
-                if (Sounds.guitar.paused) {
-                    Sounds.guitar.play().catch(e => {
-                        console.warn("Error al reproducir el audio:", e);
-                    });
-                }
-                vibrate(50);
-
-                if (GameState.beats >= GameState.targetBeats) {
-                    endGame();
-                }
-            }
-        }
-
-        function endGame() {
-            GameState.isGameActive = false;
-            window.removeEventListener('devicemotion', handleMotion);
+    async function initializeGame() {
+        DOMElements.overlayStart.classList.add('hidden');
+        try {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const source = audioContext.createBufferSource();
+            source.buffer = audioContext.createBuffer(1, 1, 22050);
+            source.connect(audioContext.destination);
+            source.start?.(0);
+            await Sounds.guitar.play().catch(() => {
+                document.body.addEventListener('touchend', () => {
+                    Sounds.guitar.play().then(() => Sounds.guitar.pause());
+                }, { once: true });
+            });
             Sounds.guitar.pause();
-            
-            const finalTime = ((Date.now() - GameState.startTime) / 1000).toFixed(2);
-            
-            DOMElements.finalMessageDisplay.innerText = `¡Rockeaste en`;
-            DOMElements.finalTimeDisplay.innerText = `${finalTime}s!`;
-            DOMElements.overlayResults.classList.remove('hidden');
-
-            launchConfetti();
-            vibrate([200, 100, 200]);
-
-            setTimeout(() => {
-                window.location.href = '[https://forms.gle/VvtAHk7RNg5DyYM3A](https://forms.gle/VvtAHk7RNg5DyYM3A)';
-            }, 4000);
-        }
-        
-        function launchConfetti() {
-            const duration = 3 * 1000;
-            const animationEnd = Date.now() + duration;
-            const colors = ['#0077C6', '#ADD8E6', '#FFFFFF', '#FF00FF'];
-            function frame() {
-                GameState.confettiLauncher({ particleCount: 3, angle: 60, spread: 55, origin: { x: 0 }, colors: colors });
-                GameState.confettiLauncher({ particleCount: 3, angle: 120, spread: 55, origin: { x: 1 }, colors: colors });
-                if (Date.now() < animationEnd) requestAnimationFrame(frame);
-            }
-            frame();
+            Sounds.guitar.currentTime = 0;
+        } catch (e) {
+            console.warn("El contexto de audio no pudo ser iniciado.");
         }
 
-        function startGame() {
-            GameState.isGameActive = true;
-            GameState.startTime = Date.now();
-        }
+        window.addEventListener('devicemotion', handleMotion);
+        GameState.isGameActive = true;
+        GameState.startTime = Date.now();
+    }
 
-        async function initializeGame() {
-            DOMElements.overlayStart.classList.add('hidden');
-            
-            // Intenta reproducir y pausar el audio de inmediato para "desbloquearlo" en iOS
+    DOMElements.startButton.addEventListener('click', async () => {
+        if (typeof DeviceMotionEvent?.requestPermission === 'function') {
             try {
-                await Sounds.guitar.play();
-                Sounds.guitar.pause();
-                Sounds.guitar.currentTime = 0;
-            } catch (e) {
-                console.warn("Audio play was prevented:", e);
-                // El juego puede continuar incluso si el audio no se reproduce
-            }
-
-            if (typeof DeviceMotionEvent.requestPermission === 'function') {
-                try {
-                    const permissionState = await DeviceMotionEvent.requestPermission();
-                    if (permissionState === 'granted') {
-                        window.addEventListener('devicemotion', handleMotion);
-                        startGame();
-                    } else {
-                        alert('Para jugar, necesitas permitir el acceso al sensor de movimiento. Por favor, recarga la página e inténtalo de nuevo.');
-                        DOMElements.overlayStart.classList.remove('hidden');
-                    }
-                } catch (error) {
-                    alert('Hubo un error al solicitar los permisos. Por favor, asegúrate de que estás usando un dispositivo móvil.');
-                    DOMElements.overlayStart.classList.remove('hidden');
+                const permission = await DeviceMotionEvent.requestPermission();
+                if (permission !== 'granted') {
+                    alert('Necesitas permitir acceso al sensor de movimiento.');
+                    return;
                 }
-            } else {
-                // Para navegadores que no requieren permiso (como Android)
-                window.addEventListener('devicemotion', handleMotion);
-                startGame();
+            } catch (e) {
+                alert('Error al solicitar permisos.');
+                return;
             }
         }
-        
-        DOMElements.startButton.addEventListener('click', initializeGame);
-    </script>
+        initializeGame();
+    });
+
+    // iOS VH fix
+    function fixIOSViewport() {
+        const vh = window.innerHeight * 0.01;
+        document.documentElement.style.setProperty('--vh', `${vh}px`);
+    }
+    fixIOSViewport();
+    window.addEventListener('resize', fixIOSViewport);
+  </script>
 </body>
 </html>
