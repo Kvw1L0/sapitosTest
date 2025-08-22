@@ -1,16 +1,16 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Energía Colectiva - Corchea V5 (SVG exacta)</title>
+  <title>Energía Colectiva - Corchea V6 (SVG real)</title>
   <meta name="theme-color" content="#4e0199" />
+  <link rel="preload" as="image" href="corchea.svg" />
   <style>
     :root { --bg1:#4e0199; --bg2:#00b0ca; --fill:#00ffcc; }
     * { box-sizing: border-box; }
     body {
-      margin: 0;
-      font-family: 'Segoe UI', system-ui, sans-serif;
+      margin: 0; font-family: 'Segoe UI', system-ui, sans-serif;
       background: linear-gradient(to bottom right, var(--bg1), var(--bg2));
       color: #fff; text-align: center; padding: 20px; overflow-x: hidden;
     }
@@ -27,20 +27,18 @@
 
     /* ---- CORCHEA (progreso) ---- */
     .noteWrap {
-      margin: 24px auto;
-      width: min(80%, 420px);
-      aspect-ratio: 450 / 675; /* del viewBox del SVG original */
-      position: relative;
+      margin: 24px auto; width: min(80%, 420px);
+      /* se ajusta al viewBox de tu SVG (ej: 450 x 675) => 2:3 */
+      aspect-ratio: 2 / 3; position: relative; visibility: hidden; /* visible al cargar */
     }
+    .noteWrap.ready { visibility: visible; }
     .noteWrap svg { width: 100%; height: 100%; display: block; }
-    .noteOutline { stroke:#fff; stroke-width:6; fill:transparent; opacity:.9; }
+    .noteOutline { stroke:#fff; stroke-width:6; fill:transparent; opacity:.95; }
     .noteBack { fill: rgba(255,255,255,.08); }
     .noteFill {
       fill: var(--fill);
-      transform-box: fill-box;
-      transform-origin: center bottom;
-      transform: scaleY(0);
-      transition: transform .25s ease-out;
+      transform-box: fill-box; transform-origin: center bottom;
+      transform: scaleY(0); transition: transform .25s ease-out;
     }
 
     .watts { font-size: 24px; margin-top: 12px; }
@@ -65,6 +63,7 @@
       .noteFill { transition: none; }
     }
     .sr { position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden; }
+    .loading { font-size:14px; opacity:.8; }
   </style>
 </head>
 <body>
@@ -78,7 +77,7 @@
     <button id="resetBtn" class="btn" title="Reinicia (R)">↺ Reset</button>
   </div>
 
-  <!-- Corchea (progreso) usando la silueta EXACTA del SVG -->
+  <!-- Contenedor del progreso (se completa con paths del SVG real) -->
   <div
     class="noteWrap"
     role="progressbar"
@@ -87,31 +86,23 @@
     aria-valuemax="500"
     aria-valuenow="0"
   >
-    <svg viewBox="0 0 450 675.000002" aria-hidden="true">
+    <div class="loading" id="loadingMsg">Cargando corchea…</div>
+    <svg id="noteSvg" viewBox="0 0 450 675" aria-hidden="true">
       <defs>
-        <clipPath id="note-clip" clipPathUnits="userSpaceOnUse">
-          <!-- paths importados del SVG -->
-          <path d="M 254.207031 82.925781 C 255.757812 82.183594 257.5625 82 ... (recortado) ..." />
-          <path d="M 257.550781 82.925781 C 259.101562 82.183594 260.90625 8 ... (recortado) ..." />
-        </clipPath>
+        <clipPath id="noteClip" clipPathUnits="userSpaceOnUse"></clipPath>
       </defs>
 
-      <!-- Fondo leve para ver la forma desde 0% -->
-      <g class="noteBackGroup">
-        <path class="noteBack" d="M 254.207031 82.925781 C 255.757812 82.183594 257.5625 82 ... (recortado) ..." />
-        <path class="noteBack" d="M 257.550781 82.925781 C 259.101562 82.183594 260.90625 8 ... (recortado) ..." />
+      <!-- Fondo leve (se pobla con paths) -->
+      <g class="noteBackGroup"></g>
+
+      <!-- Relleno animado recortado por la corchea -->
+      <g clip-path="url(#noteClip)">
+        <!-- el tamaño se ajusta al viewBox real del SVG -->
+        <rect id="noteFill" class="noteFill" x="0" y="0" width="450" height="675" />
       </g>
 
-      <!-- Relleno recortado por la corchea -->
-      <g clip-path="url(#note-clip)">
-        <rect id="noteFill" class="noteFill" x="0" y="0" width="450" height="675.000002" />
-      </g>
-
-      <!-- Contorno -->
-      <g class="noteOutlineGroup">
-        <path class="noteOutline" d="M 254.207031 82.925781 C 255.757812 82.183594 257.5625 82 ... (recortado) ..." />
-        <path class="noteOutline" d="M 257.550781 82.925781 C 259.101562 82.183594 260.90625 8 ... (recortado) ..." />
-      </g>
+      <!-- Contorno (se pobla con paths) -->
+      <g class="noteOutlineGroup"></g>
     </svg>
   </div>
 
@@ -125,18 +116,94 @@
     // --- Estado ---
     let watts = 0, displayWatts = 0;
     const maxWatts = 500;
-    const noteFill = document.getElementById('noteFill');
     const wattCounter = document.getElementById('wattCounter');
     const confettiContainer = document.getElementById('confettiContainer');
     const live = document.getElementById('live');
     const btnEnable = document.getElementById('enableMotion');
     const btnTap = document.getElementById('tapCharge');
     const btnReset = document.getElementById('resetBtn');
-    const progressEl = document.querySelector('.noteWrap');
+    const progressWrap = document.querySelector('.noteWrap');
+    const noteSvg = document.getElementById('noteSvg');
+    const noteFill = document.getElementById('noteFill');
+    const noteClip = document.getElementById('noteClip');
+    const backGroup = noteSvg.querySelector('.noteBackGroup');
+    const outlineGroup = noteSvg.querySelector('.noteOutlineGroup');
+    const loadingMsg = document.getElementById('loadingMsg');
     let celebrationTriggered = false;
     let lastAddTs = 0;
 
     const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+    // ---- Carga del SVG real y armado de la silueta ----
+    async function loadRealNote() {
+      try {
+        const res = await fetch('corchea.svg', { cache: 'force-cache' });
+        if (!res.ok) throw new Error('No se pudo cargar corchea.svg');
+        const svgText = await res.text();
+        const doc = new DOMParser().parseFromString(svgText, 'image/svg+xml');
+        const srcSvg = doc.querySelector('svg');
+        if (!srcSvg) throw new Error('SVG inválido');
+
+        const vb = (srcSvg.getAttribute('viewBox') || '0 0 450 675').trim().split(/\s+/).map(parseFloat);
+        const [minX, minY, vbW, vbH] = vb.length === 4 ? vb : [0,0,450,675];
+
+        // Ajustar viewBox y tamaño del rect de relleno
+        noteSvg.setAttribute('viewBox', `${minX} ${minY} ${vbW} ${vbH}`);
+        noteFill.setAttribute('x', minX);
+        noteFill.setAttribute('y', minY);
+        noteFill.setAttribute('width', vbW);
+        noteFill.setAttribute('height', vbH);
+
+        // Tomamos los path "grandes" (la corchea). Si tu archivo tiene más formas, filtramos por longitud.
+        const allPaths = Array.from(doc.querySelectorAll('path'));
+        const bigPaths = allPaths.filter(p => (p.getAttribute('d') || '').length > 500);
+        const usePaths = bigPaths.length ? bigPaths : allPaths; // fallback por si no hay "grandes"
+
+        // Poblar clipPath, fondo y contorno
+        usePaths.forEach(p => {
+          const d = p.getAttribute('d');
+          if (!d) return;
+
+          const c = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          c.setAttribute('d', d);
+          noteClip.appendChild(c);
+
+          const b = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          b.setAttribute('d', d);
+          b.setAttribute('class', 'noteBack');
+          backGroup.appendChild(b);
+
+          const o = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          o.setAttribute('d', d);
+          o.setAttribute('class', 'noteOutline');
+          outlineGroup.appendChild(o);
+        });
+
+        // Mostrar
+        progressWrap.classList.add('ready');
+        if (loadingMsg) loadingMsg.remove();
+      } catch (err) {
+        // Fallback: dibuja una corchea genérica para no dejar en blanco
+        console.warn(err);
+        const vb = [0,0,200,320];
+        noteSvg.setAttribute('viewBox', vb.join(' '));
+        noteFill.setAttribute('x', 0); noteFill.setAttribute('y', 0);
+        noteFill.setAttribute('width', 200); noteFill.setAttribute('height', 320);
+
+        const pieces = [
+          'M126 70 C185 70, 170 120, 128 138 C185 138, 170 188, 128 206 L126 186 C160 170, 150 145, 122 138 L122 70 Z',
+          'M116 70 h20 a10 10 0 0 1 10 10 v200 a10 10 0 0 1 -10 10 h-20 a10 10 0 0 1 -10 -10 v-200 a10 10 0 0 1 10 -10 z',
+          'M72 262 a52 38 0 1 0 104 0 a52 38 0 1 0 -104 0 z'
+        ];
+        pieces.forEach(d => {
+          const c = document.createElementNS('http://www.w3.org/2000/svg', 'path'); c.setAttribute('d', d); noteClip.appendChild(c);
+          const b = document.createElementNS('http://www.w3.org/2000/svg', 'path'); b.setAttribute('d', d); b.setAttribute('class','noteBack'); backGroup.appendChild(b);
+          const o = document.createElementNS('http://www.w3.org/2000/svg', 'path'); o.setAttribute('d', d); o.setAttribute('class','noteOutline'); outlineGroup.appendChild(o);
+        });
+        progressWrap.classList.add('ready');
+        if (loadingMsg) loadingMsg.textContent = 'Usando silueta genérica (no se pudo cargar corchea.svg)';
+      }
+    }
 
     function animateUI() {
       if (displayWatts < watts) {
@@ -152,9 +219,8 @@
     function updateProgress(current) {
       const percent = Math.min((current / maxWatts) * 100, 100);
       noteFill.style.transform = `scaleY(${percent/100})`;
-
       wattCounter.textContent = Math.round(current);
-      progressEl.setAttribute('aria-valuenow', Math.round(current));
+      progressWrap.setAttribute('aria-valuenow', Math.round(current));
 
       if (current >= maxWatts && !celebrationTriggered) {
         celebrationTriggered = true;
@@ -176,23 +242,19 @@
       const chars = ['♪', '♫', '🎵', '🎶'];
       const colors = ['#00ffcc', '#ffffff', '#ffd54f', '#c3f8ff'];
       const N = 70;
-
       for (let i = 0; i < N; i++) {
         const wrapper = document.createElement('div');
         wrapper.className = 'note';
         wrapper.style.left = Math.random() * 100 + 'vw';
         wrapper.style.animationDuration = (Math.random() * 1.5 + 1.6) + 's';
-
         const glyph = document.createElement('span');
         glyph.className = 'glyph';
         glyph.textContent = chars[(Math.random() * chars.length) | 0];
         glyph.style.fontSize = (Math.random() * 20 + 18) + 'px';
         glyph.style.animationDuration = (Math.random() * 1.2 + 0.8) + 's';
         glyph.style.color = colors[(Math.random() * colors.length) | 0];
-
         wrapper.appendChild(glyph);
         confettiContainer.appendChild(wrapper);
-
         setTimeout(() => wrapper.remove(), 4000);
       }
     }
@@ -205,7 +267,6 @@
     function onMotion(event) {
       const now = performance.now();
       const intervalOk = (now - lastAddTs) > 80;
-
       let ax, ay, az;
       if (event.acceleration && event.acceleration.x !== null) {
         ax = event.acceleration.x; ay = event.acceleration.y; az = event.acceleration.z;
@@ -215,10 +276,7 @@
         gravity.y = ALPHA * gravity.y + (1 - ALPHA) * a.y;
         gravity.z = ALPHA * gravity.z + (1 - ALPHA) * a.z;
         ax = a.x - gravity.x; ay = a.y - gravity.y; az = a.z - gravity.z;
-      } else {
-        return;
-      }
-
+      } else { return; }
       const mag = Math.hypot(ax, ay, az);
       if (mag > THRESH && intervalOk && !celebrationTriggered) {
         const bonus = clamp((mag - THRESH) / 3, 0.5, 3);
@@ -231,7 +289,6 @@
       const needsPermission =
         typeof DeviceMotionEvent !== 'undefined' &&
         typeof DeviceMotionEvent.requestPermission === 'function';
-
       if (needsPermission) {
         btnEnable.style.display = '';
       } else {
@@ -262,7 +319,6 @@
     btnEnable.addEventListener('click', requestPermission);
     btnTap.addEventListener('click', () => addEnergy(2));
     btnReset.addEventListener('click', resetAll);
-
     window.addEventListener('keydown', (e) => {
       if (e.code === 'Space') { e.preventDefault(); addEnergy(2); }
       if (e.key.toLowerCase() === 'r') resetAll();
@@ -275,8 +331,12 @@
     }
 
     // Init
-    updateProgress(0);
-    enableMotionIfNeeded();
+    (async () => {
+      updateProgress(0);
+      enableMotionIfNeeded();
+      await loadRealNote(); // <- aquí cargamos e inyectamos la corchea REAL
+    })();
   </script>
 </body>
 </html>
+
