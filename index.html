@@ -1,126 +1,517 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-    <title>Rock Challenge</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Misión: Código Navidad</title>
     <style>
+        /* ================= ESTILOS (CSS) ================= */
         :root {
-            --sap-blue: #00A1E0;
-            --neon-pink: #FF00FF;
-            --electric-blue: #03DAC6;
-            --dark-background: #1A1A2E;
-            --glow-color: #E0F7FA;
+            --bg-color: #121212;        /* Negro profundo */
+            --primary-color: #00ff41;   /* Verde Matrix/Hacker */
+            --secondary-color: #ff3131; /* Rojo Neón/Navidad */
+            --text-color: #e0e0e0;      /* Blanco hueso */
+            --card-color: #1e1e1e;      /* Gris oscuro */
+            --font-mono: 'Courier New', Courier, monospace;
         }
 
-        body {
-            margin: 0;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--dark-background);
-            background-image: radial-gradient(circle at 50% 50%, #4a2f8c 0%, #1a1a2e 70%);
-            color: white;
-            text-align: center;
-            padding: 20px;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
+        * {
             box-sizing: border-box;
         }
 
-        /* --- Overlays --- */
-        .overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(26, 26, 46, 0.95); backdrop-filter: blur(10px);
-            z-index: 10000; display: flex; flex-direction: column;
-            justify-content: center; align-items: center; padding: 25px;
-            box-sizing: border-box; transition: opacity 0.5s ease-out;
-            opacity: 1; pointer-events: auto;
-        }
-        .overlay.hidden { opacity: 0; pointer-events: none; }
-        .overlay-content { max-width: 450px; }
-        .overlay-content h2 { font-size: 28px; color: var(--sap-blue); text-shadow: none; }
-        .overlay-content p { font-size: 18px; line-height: 1.6; }
-        #startButton {
-            margin-top: 25px; padding: 15px 30px; font-size: 20px; font-weight: bold;
-            color: white; background-color: var(--sap-blue);
-            border: none; border-radius: 10px; cursor: pointer;
-            box-shadow: 0 0 15px var(--sap-blue);
-            transition: transform 0.2s;
-        }
-        #startButton:active { transform: scale(0.95); }
-
-        /* Estilo para el logo SVG */
-        .sap-logo-container {
-            width: 100px;
-            height: auto;
-            margin: 10px auto;
-        }
-        .sap-logo-container svg {
-            width: 100%;
-            height: auto;
-        }
-
-        /* OVERLAY FINAL "WOW" ACTUALIZADO */
-        #overlay-results .results-wrapper {
-            transform: scale(0.8);
-            opacity: 0;
-            animation: result-appear 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-        }
-        @keyframes result-appear {
-            to { transform: scale(1); opacity: 1; }
-        }
-        #overlay-results .final-message {
-            font-size: 2.8em;
-            font-weight: 700;
-            margin-bottom: 10px;
-            color: var(--electric-blue);
-            text-shadow: 0 0 8px var(--electric-blue), 0 0 15px white;
-            -webkit-text-stroke: 2px white;
-            text-stroke: 2px white;
-            paint-order: stroke fill;
-        }
-        #overlay-results .final-time-value {
-            font-size: 6em;
-            font-weight: 900;
-            color: var(--neon-pink);
-            -webkit-text-stroke: 2px white;
-            text-stroke: 2px white;
-            paint-order: stroke fill;
-            text-shadow: 0 0 10px var(--neon-pink), 0 0 20px white, 0 0 30px var(--neon-pink);
+        body {
+            font-family: var(--font-mono);
+            background-color: var(--bg-color);
+            color: var(--text-color);
             margin: 0;
+            padding: 0;
+            overflow: hidden; /* Evitar scroll en el body principal */
         }
 
-        /* --- Contenido Principal --- */
-        .game-area { 
+        /* Utilitarios */
+        .highlight { color: var(--primary-color); }
+        .danger { color: var(--secondary-color); }
+        .hidden { display: none !important; }
+
+        /* --- Estructura de Pantallas --- */
+        .screen {
             display: none;
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            flex-grow: 1; 
+            flex-direction: column;
+            height: 100vh;
+            width: 100vw;
+            position: absolute;
+            top: 0;
+            left: 0;
+            background-color: var(--bg-color);
         }
-        .music-note-container {
-            width: 328px;
+        .screen.active {
+            display: flex;
+        }
+
+        /* --- Pantalla de Login --- */
+        #login-screen {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+            z-index: 100;
+        }
+        #login-screen h1 {
+            color: var(--secondary-color);
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        #login-screen h2 {
+            margin-top: 0;
+            font-size: 2.5rem;
+            text-shadow: 0 0 10px var(--primary-color);
+        }
+        
+        /* Inputs y Botones Generales */
+        input[type="text"] {
+            background-color: #000;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+            padding: 15px;
+            width: 100%;
+            max-width: 300px;
             margin-bottom: 20px;
-            filter: drop-shadow(0 0 8px var(--glow-color));
-            animation: breathing 4s ease-in-out infinite alternate;
+            font-family: var(--font-mono);
+            font-size: 1.1rem;
+            text-align: center;
+            text-transform: uppercase;
+            border-radius: 4px;
         }
-        @keyframes breathing {
-            from { transform: scale(1); }
-            to { transform: scale(1.03); }
+        input[type="text"]::placeholder {
+            color: #444;
+            text-transform: none;
         }
-        .footer { width: 100%; font-size: 12px; opacity: 0.4; padding: 10px 0; }
-        #confetti-canvas {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; z-index: 10001;
+        
+        button {
+            background-color: var(--primary-color);
+            color: #000;
+            border: none;
+            padding: 15px 30px;
+            font-family: var(--font-mono);
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            border-radius: 4px;
+            box-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
+            transition: all 0.2s;
         }
+        button:active {
+            transform: scale(0.95);
+        }
+        #login-button {
+            background-color: var(--secondary-color);
+            color: white;
+            box-shadow: 0 0 15px rgba(255, 49, 49, 0.4);
+        }
+
+        /* --- App Principal --- */
+        header {
+            background-color: #000;
+            padding: 15px;
+            border-bottom: 1px solid var(--primary-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+        #team-score-display {
+            color: var(--primary-color);
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        main {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 20px;
+            padding-bottom: 80px; /* Espacio para el footer */
+        }
+
+        /* Footer de Navegación */
+        footer {
+            background-color: #000;
+            border-top: 1px solid #333;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            height: 70px;
+        }
+        footer nav {
+            display: flex;
+            height: 100%;
+        }
+        .nav-button {
+            flex: 1;
+            background: none;
+            border: none;
+            color: #666;
+            border-radius: 0;
+            box-shadow: none;
+            font-size: 0.7rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 5px;
+        }
+        .nav-button.active {
+            color: var(--primary-color);
+            background: rgba(0, 255, 65, 0.05);
+            border-top: 2px solid var(--primary-color);
+        }
+        .nav-icon {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        /* --- Estilos Específicos de Vistas --- */
+        h2.view-title {
+            color: var(--primary-color);
+            border-bottom: 1px dashed var(--secondary-color);
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+
+        /* Lista de Misiones */
+        .mission-input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+        .mission-input-group input {
+            margin-bottom: 0;
+            flex-grow: 1;
+        }
+        .mission-input-group button {
+            padding: 0 20px;
+        }
+
+        ul#mission-list {
+            list-style: none;
+            padding: 0;
+        }
+        li.mission-item {
+            background-color: var(--card-color);
+            padding: 15px;
+            margin-bottom: 12px;
+            border-left: 4px solid var(--secondary-color);
+            border-radius: 4px;
+            position: relative;
+        }
+        li.mission-item h3 {
+            margin: 0 0 5px 0;
+            font-size: 1rem;
+        }
+        li.mission-item p {
+            margin: 0;
+            font-size: 0.8rem;
+            color: #aaa;
+        }
+        li.mission-item.completed {
+            border-left-color: var(--primary-color);
+            opacity: 0.6;
+        }
+        li.mission-item.completed::after {
+            content: "✓";
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary-color);
+            font-size: 1.5rem;
+        }
+
+        /* Mapa (Imagen simulada) */
+        .map-container {
+            width: 100%;
+            height: 300px;
+            background: repeating-linear-gradient(
+                45deg,
+                #222,
+                #222 10px,
+                #2a2a2a 10px,
+                #2a2a2a 20px
+            );
+            border: 2px solid var(--secondary-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            text-align: center;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        /* Panel Final */
+        .final-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .final-grid input {
+            margin-bottom: 0;
+            font-size: 0.9rem;
+        }
+        #final-submit-button {
+            width: 100%;
+            background-color: var(--secondary-color);
+            color: white;
+            font-size: 1.2rem;
+            padding: 20px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 49, 49, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 49, 49, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 49, 49, 0); }
+        }
+
     </style>
 </head>
 <body>
 
-    <div id="overlay-start" class="overlay">
-        <div class="overlay-content">
-            <div class="sap-logo-container">
-                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1690" zoomAndPan="magnify" viewBox="0 0 1267.5 809.999993" height="1080" preserveAspectRatio="xMidYMid meet" version="1.2"><metadata><ContainsAiGeneratedContent>Yes</ContainsAiGeneratedContent></metadata><defs><clipPath id="79bbbb07bc"><path d="M 0 0.160156 L 1267 0.160156 L 1267 809.839844 L 0 809.839844 Z M 0 0.160156 "/></clipPath><clipPath id="dbc506454c"><path d="M 0 26 L 1183.78125 26 L 1183.78125 783.875 L 0 783.875 Z M 0 26 "/></clipPath></defs><g id="1f67dc2025"><g clip-rule="nonzero" clip-path="url(#79bbbb07bc)"><path style=" stroke:none;fill-rule:nonzero;fill:#ffffff;fill-opacity:1;" d="M 0 0.160156 L 1267 0.160156 L 1267 809.839844 L 0 809.839844 Z M 0 0.160156 "/><path style=" stroke:none;fill-rule:nonzero;fill:#ffffff;fill-opacity:1;" d="M 0 0.160156 L 1267 0.160156 L 1267 809.839844 L 0 809.839844 Z M 0 0.160156 "/></g><g clip-rule="nonzero" clip-path="url(#dbc506454c)"><g mask="url(#4c7286bfca)" transform="matrix(1.570004,0,0,1.569257,0,25.92464)"><image width="754" xlink:href="data:image/png;base64,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J/P96nF5mH/c9v6/p2B374qQY9f/jXJ45yWvPj7n/jTjX/Xf2s7e+m+vX/fW13R5/M9P/uW+9TzTf21y7vO2c/5tM62Vj5N3/4j0+p/8f8Y9LzVd/yv9v+7n3v+z+yS/2d/5w4f2fD3m5H9q+aU3Xz9pL3O/bY7d3L3v9e73/P/O43/O3f+3/9n/7H+9n/fX+7H/+3f+f/9D/9D/fB563/8D//v+5//f/u3/P9974lP7O/m/+9H9/f+aL86/2O/17f+4//v/+v/9//5f/m//4/kX/8P/z/+/93/9H/9d/wD8c3/r9+P//t//w///+v/9f//v+W/y/0n/+T/H/7//x///8v/xv/8//x//988v/3X///3/P///2v/9/9//3//4//9///1n/+/z///97///gD/4f/4v//9z///+k//v//+//z//6///8//+//5////6///t///m//m///1//5//+////y////v//z////4v//9///9z//3//4//+z//3////m//w///y///+/+v////y////+//z////s/5f//9//x//w///r/7P/9///3/v+1////k///7/f////z///+v////+//m////5f//9f/x//8///7///9/9v//+//z//6///v/9//8f/8//+//y/m////v//t///+//v//+//3/+/+v/y/n/y//w/+/+//v/x//4//5f/x//x/+//x/9+//3/z/8u/8f/x//5//5//8//8/7v//7/7//s///x/8v//x/z/0f//7/9f/3//t//w///x//5//+z/+////2//w///+//5/8v//x/+//v/9////z//+v/z/9+//y///+//7//v//9/9v//3//z/x/+//m/7/+//z////s/8v/8///+v/t//v//z///+z//+z/6////5//z///8//z///9//+//5/4v/9/v//t////v//z/v//v//z/v//v//9v//v//z///+z//+3/v/9/9///+v//9/9v/9//v/9v//v//z/v//9/9///+//z/v//3/v/9/9///+v/z/v//9/v//z/v//9/v//z/v//z/v//z/v//9/v//z/v//9/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z/v//9/v//z/v//z/v//z/v//z
+    <div id="login-screen" class="screen active">
+        <div style="width: 100%; max-width: 400px;">
+            <h1>Misión:</h1>
+            <h2><span class="highlight">CÓDIGO NAVIDAD</span></h2>
+            <p style="margin-bottom: 30px; font-size: 0.9rem;">Red eléctrica caída. Agentes requeridos.</p>
+            
+            <input type="text" id="team-name-input" placeholder="NOMBRE DE AGENCIA (EQUIPO)">
+            <br>
+            <button id="login-button">INICIAR PROTOCOLO</button>
+        </div>
+    </div>
+
+    <div id="app-screen" class="screen">
+        
+        <header>
+            <div id="team-name-display">AGENTE: ---</div>
+            <div id="team-score-display">ENERGÍA: 0%</div>
+        </header>
+
+        <main id="main-content">
+            </main>
+
+        <footer>
+            <nav>
+                <button class="nav-button active" onclick="loadView('missions')">
+                    <span class="nav-icon">📋</span> MISIONES
+                </button>
+                <button class="nav-button" onclick="loadView('map')">
+                    <span class="nav-icon">🗺️</span> MAPA
+                </button>
+                <button class="nav-button" onclick="loadView('final')">
+                    <span class="nav-icon">☢️</span> NÚCLEO
+                </button>
+            </nav>
+        </footer>
+
+    </div>
+
+    <template id="view-missions">
+        <h2 class="view-title">Lista de Objetivos</h2>
+        <p>Encuentra las claves en la zona de juego e ingrésalas para restaurar energía.</p>
+        
+        <div class="mission-input-group">
+            <input type="text" id="code-input" placeholder="CÓDIGO OBTENIDO">
+            <button id="submit-code-btn">OK</button>
+        </div>
+
+        <ul id="mission-list">
+            </ul>
+    </template>
+
+    <template id="view-map">
+        <h2 class="view-title">Radar de Anomalías</h2>
+        <p>Localizaciones confirmadas de actividad del villano.</p>
+        <div class="map-container">
+            <div>
+                <h3>[MAPA DEL EVENTO]</h3>
+                <p>Aquí iría la imagen del plano del lugar.</p>
+                <p style="color: var(--secondary-color); font-size: 0.8rem;">⚠ Zonas Rojas detectadas</p>
+            </div>
+        </div>
+        <div style="margin-top: 20px;">
+            <h3>Instrucciones de Campo:</h3>
+            <ul style="font-size: 0.9rem; color: #aaa; list-style-type: square;">
+                <li>Busca pósters con el logo del Villano.</li>
+                <li>Escanea QRs ocultos en las paredes.</li>
+                <li>Interroga a los personajes sospechosos.</li>
+            </ul>
+        </div>
+    </template>
+
+    <template id="view-final">
+        <h2 class="view-title danger">NÚCLEO DE ENERGÍA</h2>
+        <p>ADVERTENCIA: Solo personal autorizado. Ingrese los 5 fragmentos de la llave maestra.</p>
+        
+        <div class="final-grid">
+            <input type="text" class="final-key" placeholder="PALABRA 1">
+            <input type="text" class="final-key" placeholder="PALABRA 2">
+            <input type="text" class="final-key" placeholder="PALABRA 3">
+            <input type="text" class="final-key" placeholder="PALABRA 4">
+            <input type="text" class="final-key" placeholder="PALABRA 5">
+        </div>
+
+        <button id="final-submit-button">RESTAURAR SISTEMA</button>
+    </template>
+
+
+    <script>
+        // --- CONFIGURACIÓN DEL JUEGO ---
+        const GAME_CONFIG = {
+            // Las misiones disponibles
+            missions: [
+                { id: "m1", title: "Identificar al Elfo", desc: "Busca el póster en la Zona A.", points: 200, code: "ELFO-77", keyFragment: "LUZ" },
+                { id: "m2", title: "Prueba de Canto", desc: "Canta al monitor en la Zona B.", points: 300, code: "JINGLEBELLS", keyFragment: "NAVIDAD" },
+                { id: "m3", title: "Cifrado Matemático", desc: "Resuelve la carta en la Zona C.", points: 250, code: "OCHO", keyFragment: "PAZ" },
+                { id: "m4", title: "Navegación Brújula", desc: "Sigue las coordenadas al Sur.", points: 250, code: "POLO-SUR", keyFragment: "AMOR" },
+                { id: "m5", title: "Escáner de Anomalía", desc: "Encuentra el producto falso.", points: 200, code: "RESCATE", keyFragment: "FINAL" }
+            ],
+            // Palabras correctas para el final (basado en keyFragments)
+            finalSolution: ["LUZ", "NAVIDAD", "PAZ", "AMOR", "FINAL"] 
+        };
+
+        // --- ESTADO (Local, se borra al refrescar) ---
+        let gameState = {
+            teamName: "",
+            score: 0,
+            completedMissions: [] // Array de IDs completados
+        };
+
+        // --- ELEMENTOS DOM ---
+        const loginScreen = document.getElementById('login-screen');
+        const appScreen = document.getElementById('app-screen');
+        const mainContent = document.getElementById('main-content');
+        const navButtons = document.querySelectorAll('.nav-button');
+        const teamDisplay = document.getElementById('team-name-display');
+        const scoreDisplay = document.getElementById('team-score-display');
+
+        // --- INICIO ---
+        document.getElementById('login-button').addEventListener('click', () => {
+            const name = document.getElementById('team-name-input').value.trim();
+            if(name.length < 3) {
+                alert("Nombre de agencia demasiado corto.");
+                return;
+            }
+            gameState.teamName = name;
+            teamDisplay.textContent = "AGENTE: " + name.toUpperCase().substring(0, 10);
+            
+            loginScreen.classList.remove('active');
+            appScreen.classList.add('active');
+            loadView('missions'); // Cargar vista inicial
+        });
+
+        // --- NAVEGACIÓN ---
+        window.loadView = function(viewName) {
+            // 1. Actualizar botones
+            navButtons.forEach(btn => btn.classList.remove('active'));
+            // Encontrar el botón correspondiente (simple lógica por índice o onclick)
+            // Aquí lo manejamos visualmente simple, el click en el HTML ya activa la función.
+            
+            // 2. Renderizar Template
+            const template = document.getElementById('view-' + viewName);
+            if(!template) return;
+
+            mainContent.innerHTML = "";
+            mainContent.appendChild(template.content.cloneNode(true));
+
+            // 3. Lógica específica de la vista
+            if(viewName === 'missions') setupMissionsView();
+            if(viewName === 'final') setupFinalView();
+        };
+
+        // --- LÓGICA: VISTA MISIONES ---
+        function setupMissionsView() {
+            const list = document.getElementById('mission-list');
+            const input = document.getElementById('code-input');
+            const btn = document.getElementById('submit-code-btn');
+
+            // Renderizar lista
+            GAME_CONFIG.missions.forEach(mission => {
+                const isDone = gameState.completedMissions.includes(mission.id);
+                const li = document.createElement('li');
+                li.className = `mission-item ${isDone ? 'completed' : ''}`;
+                li.innerHTML = `
+                    <h3>${mission.title} <span style="float:right; font-size:0.8em">${mission.points}pts</span></h3>
+                    <p>${mission.desc}</p>
+                `;
+                list.appendChild(li);
+            });
+
+            // Manejar validación
+            btn.onclick = () => {
+                const code = input.value.trim().toUpperCase();
+                validateCode(code);
+                input.value = ""; // Limpiar
+            };
+        }
+
+        function validateCode(code) {
+            // Buscar misión que coincida con el código
+            const mission = GAME_CONFIG.missions.find(m => m.code === code);
+
+            if(mission) {
+                if(gameState.completedMissions.includes(mission.id)) {
+                    alert("¡Misión ya completada anteriormente!");
+                } else {
+                    // ÉXITO
+                    gameState.completedMissions.push(mission.id);
+                    gameState.score += mission.points;
+                    updateScore();
+                    alert(`✅ ¡CÓDIGO CORRECTO!\n\nHas ganado ${mission.points} puntos de energía.\n\nIMPORTANTE: El fragmento de llave es: "${mission.keyFragment}"\n¡Anótalo!`);
+                    setupMissionsView(); // Recargar lista
+                }
+            } else {
+                alert("⛔ CÓDIGO INVÁLIDO. Verifica tus datos.");
+            }
+        }
+
+        function updateScore() {
+            // Calcular porcentaje (simple: 1300 pts = 100%)
+            const totalPointsPossible = GAME_CONFIG.missions.reduce((sum, m) => sum + m.points, 0);
+            const percentage = Math.floor((gameState.score / totalPointsPossible) * 100);
+            scoreDisplay.textContent = `ENERGÍA: ${percentage}%`;
+        }
+
+        // --- LÓGICA: VISTA FINAL ---
+        function setupFinalView() {
+            const btn = document.getElementById('final-submit-button');
+            
+            btn.onclick = () => {
+                const inputs = document.querySelectorAll('.final-key');
+                let userWords = [];
+                inputs.forEach(inp => userWords.push(inp.value.trim().toUpperCase()));
+
+                // Verificar si las palabras coinciden (no importa el orden para hacerlo más fácil, o sí importa?)
+                // Vamos a hacerlo estricto: Deben estar en orden o ser las palabras correctas.
+                // Simplifiquemos: Contar cuántas correctas hay.
+                
+                let correctCount = 0;
+                userWords.forEach((word, index) => {
+                    if(GAME_CONFIG.finalSolution.includes(word)) correctCount++;
+                });
+
+                if(correctCount === 5) {
+                    alert("🎉 ¡SISTEMA RESTAURADO! 🎉\n\n¡Felicidades Agentes!\nHan salvado la Navidad.\nDiríjanse a la base para su recompensa.");
+                    document.body.style.backgroundColor = "#004400"; // Efecto visual de éxito
+                } else {
+                    alert("⚠️ ERROR DE SISTEMA ⚠️\n\nLos fragmentos de llave son incorrectos o están incompletos.\nRevisen sus misiones.");
+                }
+            };
+        }
+
+    </script>
+</body>
+</html>
